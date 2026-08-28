@@ -93,6 +93,28 @@ test('workspace backup import uses the same visible keyboard control', async ({ 
   expect(await (await picker).element().getAttribute('id')).toBe('backup-input');
 });
 
+test('mobile editor touch controls meet the 44px target contract', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.locator('#csv-input').setInputFiles({ name: 'wetlands.csv', mimeType: 'text/csv', buffer: Buffer.from(csv) });
+
+  const controls = [
+    page.locator('[data-token]'),
+    page.locator('[data-remove-keyword]'),
+    page.getByRole('button', { name: 'Add term' })
+  ];
+  for (const control of controls) {
+    const count = await control.count();
+    expect(count).toBeGreaterThan(0);
+    for (let index = 0; index < count; index += 1) {
+      const box = await control.nth(index).boundingBox();
+      expect(box, `control ${index} should have a rendered box`).not.toBeNull();
+      expect(box!.width).toBeGreaterThanOrEqual(44);
+      expect(box!.height).toBeGreaterThanOrEqual(44);
+    }
+  }
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+});
+
 test('installed shell reopens offline at mobile width', async ({ page, context }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');
