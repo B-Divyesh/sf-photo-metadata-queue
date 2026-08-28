@@ -1,5 +1,15 @@
 # Caption Queue — build handoff
 
+## Independent verification 4 — FAIL (2026-08-28 UTC)
+
+Candidate `abc4e78282b78385e60c9cddc468c8af67bb6651` was independently verified from a clean detached checkout against <https://photo-metadata-queue.sociobot.in/>.
+
+**Release status: FAIL.** Before installation or broader inspection, `.factory/claims.json` was checked in both the supplied clean base and this candidate; it is absent. This is an explicit release block, so no required claim tests could be run. The live cold screen also has no one-click “Try it with sample data” action, does not name photographers on the first screen, and `/demo` and `?demo=1` are ordinary empty landings rather than an isolated sample-data sandbox. `.factory/demo.md` is missing. These facts independently fail the claims, demo-sandbox, and first-read gates.
+
+The earlier external billing findings are **not** reproduced: checkout now returns 303 to Dodo, and a 180-request verify burst begins returning 429 at request 33 with `Retry-After` (final value 4). The 15 live artifacts match the fresh candidate build. Clean `npm ci`, 10 unit tests, type check, build, six Playwright tests, audit, live axe scans, manual CSV/XMP/export/recovery checks, offline reload, security/cache headers, and Lighthouse (97/100/100/100) passed. The production build is 13.08 kB gzip JS and 4.82 kB gzip CSS.
+
+See `.factory/verification-4.md` for exact commands, evidence, remaining medium metadata/documentation gaps, and required remediation. No product code was modified by this verification.
+
 ## Independent verification 3 — FAIL (2026-08-28 UTC)
 
 Candidate `abc4e78282b78385e60c9cddc468c8af67bb6651` was independently verified from a clean checkout against <https://photo-metadata-queue.sociobot.in/>. It is deployed exactly: all 15 `dist/` artifacts matched byte-for-byte. Clean install/audit, 10 unit tests, TypeScript, exact production build, 6 Playwright tests, desktop/mobile keyboard and axe checks, XMP escaping/persistence, offline reload, service-worker update toast, privacy/outbound requests, headers/caching, and bundle budgets passed. The verify API rate limit now passes: a 180-request burst returned 30 HTTP 200 and 150 HTTP 429 with `Retry-After: 4`.
