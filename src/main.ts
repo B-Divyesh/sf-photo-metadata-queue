@@ -73,13 +73,13 @@ function landing(): string {
       <div class="hero-copy"><p class="eyebrow">A local metadata workbench</p><h1>Caption the shoot.<br><em>Keep your originals untouched.</em></h1>
         <p class="lede">Turn a folder or spreadsheet into a deliberate queue for titles, captions, keywords, and IPTC fields—then write standards-valid XMP sidecars.</p>
         <div class="hero-actions">
-          <label class="primary-button" for="photo-input">${icon('photo')} Choose photo folder</label>
-          <label class="secondary-button" for="csv-input">Import CSV</label>
-          <label class="secondary-button" for="backup-input">Restore backup</label>
+          <button class="primary-button" type="button" data-file-picker="photo-input">${icon('photo')} Choose photo folder</button>
+          <button class="secondary-button" type="button" data-file-picker="csv-input">Import CSV</button>
+          <button class="secondary-button" type="button" data-file-picker="backup-input">Restore backup</button>
         </div>
-        <input class="sr-only" id="photo-input" type="file" accept="image/*,.dng,.cr2,.cr3,.nef,.arw,.raf" multiple webkitdirectory />
-        <input class="sr-only" id="csv-input" type="file" accept=".csv,text/csv" />
-        <input class="sr-only" id="backup-input" type="file" accept=".json,application/json" />
+        <input class="sr-only" id="photo-input" type="file" accept="image/*,.dng,.cr2,.cr3,.nef,.arw,.raf" multiple webkitdirectory tabindex="-1" aria-hidden="true" />
+        <input class="sr-only" id="csv-input" type="file" accept=".csv,text/csv" tabindex="-1" aria-hidden="true" />
+        <input class="sr-only" id="backup-input" type="file" accept=".json,application/json" tabindex="-1" aria-hidden="true" />
         <p class="microcopy">No upload. No account. Sidecars only—original image bytes are never modified.</p>
       </div>
       <figure class="hero-plate"><picture><source media="(max-width: 680px)" srcset="/assets/field-desk-mobile.webp"><img src="/assets/field-desk.webp" width="1200" height="800" alt="A blank herbarium sheet with a fern, archival sleeves, and an empty contact sheet arranged on a wooden worktable" decoding="async" fetchpriority="high"></picture><figcaption><span>Plate 01</span> From contact sheet to catalog record</figcaption></figure>
@@ -101,7 +101,7 @@ function workspace(): string {
   return shell(`<main id="main" class="workbench">
     <aside class="queue-panel ${showQueue ? 'queue-open' : ''}" aria-label="Photo queue">
       <div class="shoot-heading"><div><span class="eyebrow">Current shoot</span><h1>${e(shoot.name)}</h1>${data.shoots.length > 1 ? `<label class="sr-only" for="shoot-select">Choose shoot</label><select id="shoot-select">${data.shoots.map((s) => `<option value="${e(s.id)}" ${s.id === shoot.id ? 'selected' : ''}>${e(s.name)}</option>`).join('')}</select>` : ''}</div><button class="icon-button mobile-close" id="close-queue" aria-label="Close queue">×</button></div>
-      <div class="progress-row"><span>${ready} of ${items.length} ready</span><span>${Math.round(ready / items.length * 100)}%</span></div><div class="progress"><i style="width:${ready / items.length * 100}%"></i></div>
+      <div class="progress-row"><span>${ready} of ${items.length} ready</span><span>${Math.round(ready / items.length * 100)}%</span></div><progress class="progress" aria-label="Shoot completion" max="100" value="${ready / items.length * 100}">${Math.round(ready / items.length * 100)}%</progress>
       <div class="queue-tools"><label><span class="sr-only">Search filenames</span><input id="queue-search" type="search" placeholder="Search filenames" value="${e(query)}"></label><select id="queue-filter" aria-label="Filter queue"><option value="all" ${filter === 'all' ? 'selected' : ''}>All</option><option value="unfinished" ${filter === 'unfinished' ? 'selected' : ''}>Needs work</option><option value="ready" ${filter === 'ready' ? 'selected' : ''}>Ready</option></select></div>
       <ol class="specimen-list">${visible.map((item) => queueRow(item, items.indexOf(item))).join('') || '<li class="no-results">No photographs match this filter.</li>'}</ol>
       <div class="queue-bottom"><button class="secondary-button" id="new-shoot">${icon('plus')} New shoot</button><button class="quiet-button" id="batch-button">Batch edit</button></div>
@@ -187,6 +187,7 @@ function bindCommon(): void {
 }
 
 function bindImports(): void {
+  document.querySelectorAll<HTMLButtonElement>('[data-file-picker]').forEach((button) => button.addEventListener('click', () => document.querySelector<HTMLInputElement>(`#${button.dataset.filePicker}`)?.click()));
   document.querySelector<HTMLInputElement>('#photo-input')?.addEventListener('change', async (event) => importPhotos(Array.from((event.target as HTMLInputElement).files ?? [])));
   document.querySelector<HTMLInputElement>('#csv-input')?.addEventListener('change', async (event) => { const file = (event.target as HTMLInputElement).files?.[0]; if (file) await importCsv(file); });
   document.querySelector<HTMLInputElement>('#backup-input')?.addEventListener('change', async (event) => { const file = (event.target as HTMLInputElement).files?.[0]; if (file) await importBackup(file); });

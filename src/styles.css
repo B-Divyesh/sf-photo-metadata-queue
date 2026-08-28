@@ -70,8 +70,10 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 .shoot-heading { padding: 1.5rem 1.25rem .8rem; display:flex; justify-content:space-between; }
 .shoot-heading h1 { font-size: 1.7rem; line-height: 1.1; margin: 0; }
 .progress-row { padding: 0 1.25rem .4rem; display: flex; justify-content: space-between; font-size: .75rem; color: var(--muted); font-variant-numeric: tabular-nums; }
-.progress { height: 3px; margin: 0 1.25rem 1.25rem; background: var(--soft); overflow: hidden; }
-.progress i { display: block; height: 100%; background: var(--fern); transition: width .2s ease; }
+.progress { display: block; width: calc(100% - 2.5rem); height: 3px; margin: 0 1.25rem 1.25rem; border: 0; background: var(--soft); color: var(--fern); appearance: none; }
+.progress::-webkit-progress-bar { background: var(--soft); }
+.progress::-webkit-progress-value { background: var(--fern); transition: width .2s ease; }
+.progress::-moz-progress-bar { background: var(--fern); transition: width .2s ease; }
 .queue-tools { padding: 0 1rem 1rem; display: grid; grid-template-columns: 1fr auto; gap: .5rem; }
 input, textarea, select { width: 100%; min-height: 44px; border: 1px solid var(--rule); border-radius: 4px; background: var(--surface); padding: .65rem .75rem; }
 textarea { resize: vertical; line-height: 1.5; }

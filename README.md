@@ -40,7 +40,7 @@ There are no analytics, trackers, third-party fonts, or runtime scripts. Photos 
 
 ## Deployment
 
-Deploy the contents of `dist/` to a static host with SPA fallback to `index.html` for `/privacy` and `/terms`. Serve HTTPS so service workers, installability, and directory writing are available. Do not configure secrets in the client bundle.
+Deploy the contents of `dist/` to a static host with SPA fallback to `index.html` for `/privacy` and `/terms`. The build includes `staticwebapp.config.json` for Azure Static Web Apps: documents and `sw.js` revalidate, `/assets/*` receives one-year immutable caching, and the site sends a restrictive CSP, anti-framing headers, and a Permissions-Policy. Serve HTTPS so service workers, installability, and directory writing are available. Do not configure secrets in the client bundle.
 
 ## License
 

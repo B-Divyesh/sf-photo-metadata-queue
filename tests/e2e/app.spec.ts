@@ -43,6 +43,31 @@ test('landing and editor have no serious axe violations', async ({ page }) => {
   expect(consoleErrors).toEqual([]);
 });
 
+test('keyboard focus reaches visible import buttons and each activates its file picker on desktop and mobile', async ({ page }) => {
+  const importButtons = [
+    ['Choose photo folder', 'photo-input'],
+    ['Import CSV', 'csv-input'],
+    ['Restore backup', 'backup-input']
+  ] as const;
+
+  for (const viewport of [{ width: 1280, height: 900 }, { width: 390, height: 844 }]) {
+    await page.setViewportSize(viewport);
+    await page.goto('/');
+    for (let index = 0; index < 4; index += 1) await page.keyboard.press('Tab');
+    for (const [name, inputId] of importButtons) {
+      await page.keyboard.press('Tab');
+      const button = page.getByRole('button', { name });
+      await expect(button).toBeFocused();
+      await expect(button).toHaveCSS('outline-style', 'solid');
+      await expect(button).toHaveCSS('outline-width', '3px');
+      await expect(page.locator(`#${inputId}`)).not.toBeFocused();
+      const picker = page.waitForEvent('filechooser');
+      await page.keyboard.press('Enter');
+      expect(await (await picker).element().getAttribute('id')).toBe(inputId);
+    }
+  }
+});
+
 test('installed shell reopens offline at mobile width', async ({ page, context }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');
