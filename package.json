@@ -6,9 +6,11 @@
   "scripts": {
     "dev": "vite --host 0.0.0.0",
     "build": "tsc --noEmit && vite build",
+    "typecheck": "tsc --noEmit",
     "preview": "vite preview --host 0.0.0.0",
     "test": "vitest run",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:live": "node tests/release/verify-live.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.10.2",

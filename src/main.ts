@@ -119,7 +119,7 @@ function workspace(): string {
       </article>
     </section>
     <aside class="field-notes" aria-label="Shoot tools"><section><span class="eyebrow">Vocabulary</span><h2>Field notes</h2><p>Reuse controlled terms across this shoot.</p><div class="vocab">${shoot.vocabulary.map((word) => `<button data-keyword="${e(word)}">+ ${e(word)}</button>`).join('')}</div><form id="vocab-form"><label for="vocab-input">Add a controlled term</label><div><input id="vocab-input" maxlength="60" required><button class="icon-button" aria-label="Add term">${icon('plus')}</button></div></form></section>
-      <section class="export-panel"><span class="eyebrow">Sidecar press</span><h2>Write the set</h2><p>${ready === items.length ? 'Every record is marked ready.' : `${items.length - ready} record${items.length - ready === 1 ? '' : 's'} still need review.`}</p><button class="primary-button" id="export-all">${icon('download')} Write ${items.length} XMP sidecars</button><button class="quiet-button" id="export-csv">Export metadata CSV</button><button class="quiet-button" id="export-backup">Export workspace backup</button><label class="quiet-button" for="backup-input">Import workspace backup</label><input class="sr-only" id="backup-input" type="file" accept=".json,application/json"><small>Writes new <code>.xmp</code> files. Image originals are never changed.</small></section>
+      <section class="export-panel"><span class="eyebrow">Sidecar press</span><h2>Write the set</h2><p>${ready === items.length ? 'Every record is marked ready.' : `${items.length - ready} record${items.length - ready === 1 ? '' : 's'} still need review.`}</p><button class="primary-button" id="export-all">${icon('download')} Write ${items.length} XMP sidecars</button><button class="quiet-button" id="export-csv">Export metadata CSV</button><button class="quiet-button" id="export-backup">Export workspace backup</button><button class="quiet-button" type="button" data-file-picker="backup-input">Import workspace backup</button><input class="sr-only" id="backup-input" type="file" accept=".json,application/json" tabindex="-1" aria-hidden="true"><small>Writes new <code>.xmp</code> files. Image originals are never changed.</small></section>
     </aside>
   </main>${batchDialog(shoot, items)}`);
 }
@@ -177,6 +177,7 @@ function render(): void {
 }
 
 function bindCommon(): void {
+  document.querySelectorAll<HTMLButtonElement>('[data-file-picker]').forEach((button) => button.addEventListener('click', () => document.querySelector<HTMLInputElement>(`#${button.dataset.filePicker}`)?.click()));
   document.querySelectorAll<HTMLAnchorElement>('[data-nav]').forEach((link) => link.addEventListener('click', (event) => { if (link.origin !== location.origin) return; event.preventDefault(); history.pushState({}, '', link.pathname); render(); window.scrollTo(0, 0); }));
   document.querySelector('#theme-button')?.addEventListener('click', () => { const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'; document.documentElement.dataset.theme = next; localStorage.setItem('cq-theme', next); });
   document.querySelector('#license-button')?.addEventListener('click', () => (document.querySelector('#license-dialog') as HTMLDialogElement).showModal());
@@ -187,7 +188,6 @@ function bindCommon(): void {
 }
 
 function bindImports(): void {
-  document.querySelectorAll<HTMLButtonElement>('[data-file-picker]').forEach((button) => button.addEventListener('click', () => document.querySelector<HTMLInputElement>(`#${button.dataset.filePicker}`)?.click()));
   document.querySelector<HTMLInputElement>('#photo-input')?.addEventListener('change', async (event) => importPhotos(Array.from((event.target as HTMLInputElement).files ?? [])));
   document.querySelector<HTMLInputElement>('#csv-input')?.addEventListener('change', async (event) => { const file = (event.target as HTMLInputElement).files?.[0]; if (file) await importCsv(file); });
   document.querySelector<HTMLInputElement>('#backup-input')?.addEventListener('change', async (event) => { const file = (event.target as HTMLInputElement).files?.[0]; if (file) await importBackup(file); });
