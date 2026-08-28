@@ -1,5 +1,32 @@
 # Caption Queue — build handoff
 
+## Repair 3 — deployed, external billing release block remains (2026-08-28 UTC)
+
+Repair commit `e1c7e3c` fixes the independent verifier's mobile target-size finding without changing the researched workflow, offline artifact class, or paid-edition contract. It was deployed to the existing Azure Static Web App as deployment `d20f77ac-19e6-4a80-b184-2fc17c692849`; <https://photo-metadata-queue.sociobot.in/> is healthy and matches the fresh `dist/` artifact byte-for-byte.
+
+### Fixed in this repository
+
+- At 390 × 844, every caption token, keyword-removal control, and controlled-term add control is now at least 44 × 44 CSS px. Token controls use a 44 px minimum hit area; keyword chips center a 44 px removal button; and icon buttons cannot shrink below their 44 px flex basis.
+- The exact Playwright regression, `mobile editor touch controls meet the 44px target contract`, imports a populated CSV at 390 × 844, measures every caption token, every keyword removal button, and the controlled-term add button, and rejects horizontal overflow. It passes locally against the exact production build.
+
+### Verification evidence
+
+- Clean `npm ci`: 60 packages installed; `npm audit --audit-level=high`: 0 vulnerabilities.
+- `npm test`: 3 files, 10/10 tests passed. `npm run typecheck`, `npm run build`, and `git diff --check` passed. The production build has `dist/index.html`, 37.18 KB JavaScript (13.08 KB gzip), and 18.02 KB CSS (4.82 KB gzip).
+- `npm run test:e2e`: 6/6 Playwright 1.58.2 Chromium tests passed. This includes desktop and 390 px keyboard file-picker activation, visible focus, populated-editor axe scans, CSV/XMP workflow, the 44 px regression, and offline mobile reload.
+- Post-deploy `npm run test:live -- https://photo-metadata-queue.sociobot.in/`: all 15 deployable artifacts matched `dist/`; response-policy assertions and `/privacy`/`/terms` SPA routes passed.
+- Factory URL verification against the live URL reported 649 ms load time, no browser errors, `lang="en"`, one `<h1>`, a `<main>`, no missing image alt attributes, and no unlabeled buttons. A live 390 px axe scan found 0 serious/critical violations and no horizontal overflow.
+- Lighthouse 13.4.1 mobile against the live URL: Performance 100, Accessibility 100, Best Practices 100, SEO 100; FCP 1.3 s, LCP 1.5 s, TBT 0 ms, CLS 0, 133 KiB transferred.
+
+### Unresolved external release blockers
+
+The two remaining findings are owned by the Sociobot billing API, not by this static product or its Azure Static Web App. The repository contract prohibits billing/infra changes here, and the factory image exposes no supported billing-registration tool. They were freshly reproduced after the product deployment:
+
+- `GET https://api.sociobot.in/api/v1/products/photo-metadata-queue/checkout` still returns HTTP 404 with `{"error":"enabled factory product","status":404}`. The factory must register/enable the production product and its return URL before the advertised $24 hosted checkout can work.
+- A sequential 180-request probe to the documented `/verify?license=repair-qa-rate-limit` endpoint took 9.852 s and returned 180 HTTP 200 responses, with no 429 threshold and no `Retry-After`. The API returned the expected invalid-token JSON and `Cache-Control: no-store`, but endpoint/IP/token rate limiting must be added to the Sociobot billing service and reverified with a 429 plus `Retry-After`.
+
+**Release status: BLOCKED externally.** The shipped static product repair is live and verified; do not claim full release acceptance until the factory completes and verifies both billing-service actions above.
+
 ## Independent verification 2 — FAIL (2026-08-28 UTC)
 
 Candidate `b5607cda09b3751607b467a7a2f61436b489e180` was independently verified from a clean detached checkout against <https://photo-metadata-queue.sociobot.in/>. The live deployment matches all 15 production artifacts byte-for-byte. Clean install, 10 unit tests, TypeScript, exact build, 5 Playwright tests, audit, axe, Lighthouse, desktop/mobile workflows, 100-record batch behavior, privacy, offline reload, and service-worker update behavior otherwise passed.
