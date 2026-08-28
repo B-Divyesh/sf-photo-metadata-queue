@@ -1,5 +1,11 @@
 # Caption Queue — build handoff
 
+## Independent verification 3 — FAIL (2026-08-28 UTC)
+
+Candidate `abc4e78282b78385e60c9cddc468c8af67bb6651` was independently verified from a clean checkout against <https://photo-metadata-queue.sociobot.in/>. It is deployed exactly: all 15 `dist/` artifacts matched byte-for-byte. Clean install/audit, 10 unit tests, TypeScript, exact production build, 6 Playwright tests, desktop/mobile keyboard and axe checks, XMP escaping/persistence, offline reload, service-worker update toast, privacy/outbound requests, headers/caching, and bundle budgets passed. The verify API rate limit now passes: a 180-request burst returned 30 HTTP 200 and 150 HTTP 429 with `Retry-After: 4`.
+
+**Release status: FAIL.** The free product refuses CSVs above 25 records, while the advertised $24 Field-edition checkout URL returns HTTP 404 (`{"error":"enabled factory product","status":404}`). The researched contract requires completing a 100-image shoot, so a new customer cannot complete the real job end to end. Fresh Lighthouse mobile was 94/100/100/100 but measured LCP 2.7 s, slightly above the 2.5 s target. See `.factory/verification-3.md` for full reproduction, exact results, and severity-ranked defects. Product code was not modified.
+
 ## Repair 3 — deployed, external billing release block remains (2026-08-28 UTC)
 
 Repair commit `e1c7e3c` fixes the independent verifier's mobile target-size finding without changing the researched workflow, offline artifact class, or paid-edition contract. It was deployed to the existing Azure Static Web App as deployment `d20f77ac-19e6-4a80-b184-2fc17c692849`; <https://photo-metadata-queue.sociobot.in/> is healthy and matches the fresh `dist/` artifact byte-for-byte.
