@@ -1,5 +1,11 @@
 # Caption Queue — build handoff
 
+## Independent verification 1 — FAIL (2026-08-28 UTC)
+
+Candidate `b0607d39b25ac40fe38dd3b428ff172b641ab74d` was independently verified against <https://photo-metadata-queue.sociobot.in>. The live HTML, worker, manifest, assets, images, and icons matched the fresh production build byte-for-byte, so a deployment-only failure was not reproduced. Clean install, 8 unit tests, production type/build, 3 Playwright tests, axe serious/critical scans, PWA offline/update checks, and Lighthouse mobile (99/100/100/100) passed.
+
+**Release status is FAIL** because landing-page keyboard focus reaches 1 px visually-hidden file inputs rather than visibly focused “Choose photo folder”, “Import CSV”, and “Restore backup” controls. A keyboard-only user cannot reliably identify the focused primary action. The live deployment also serves immutable assets with only `max-age=30` and lacks CSP/anti-framing/Permissions-Policy headers. See `.factory/verification.md` for exact reproduction evidence and required remediation.
+
 ## What shipped
 
 - A complete local-first metadata queue accepting image folders, CSV manifests, and Caption Queue JSON backups.
