@@ -1,0 +1,10 @@
+{
+  "slug": "photo-metadata-queue",
+  "title": "Caption Queue",
+  "territory": "utilities",
+  "user": "Photographers with large shoots who need a fast, deliberate queue for titles, captions, keywords, and IPTC fields without hand-editing every image in a DAM.",
+  "smallest_useful_product": "A local folder/CSV-driven queue that groups images by shoot, offers reusable caption tokens and controlled vocabularies, previews changes, and writes XMP sidecars.",
+  "artifact_class": "pwa-offline",
+  "monetization": "one-time",
+  "constraints": "Write sidecars by default rather than modify originals; validate IPTC/XMP escaping; no cloud image upload or LLM-generated claims."
+}
