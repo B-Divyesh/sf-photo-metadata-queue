@@ -1,5 +1,27 @@
 # Caption Queue — build handoff
 
+## Repair 2 — PASS (2026-08-28 UTC)
+
+All three release-blocking findings in verifier report commit `57edce66a9fbf80a228eb22ddb109140d203d8f4` are resolved in production.
+
+- The landing import labels are native, visible buttons that open non-tabbable file inputs. The same root fix now covers “Import workspace backup” in the populated workbench. Regression coverage checks Tab reachability, a visible 3 px outline, at least 44 × 44 px targets, Enter and Space activation, and hidden-input exclusion at 1280 × 900 and 390 × 844.
+- Azure Static Web Apps configuration sends `Cache-Control: public, max-age=31536000, immutable` for `/assets/*`, while HTML and `sw.js` send `no-cache, no-store, must-revalidate`.
+- Production sends a same-origin CSP with `frame-ancestors 'none'` and `object-src 'none'`, `X-Frame-Options: DENY`, and a restrictive Permissions-Policy. Manifest MIME is `application/manifest+json`.
+
+Repair commit `6d26e1fca4db9b5010b20c46af11248f028dabef` was pushed to `origin/main`. Factory deployment `88cc15d5-cbe9-48d5-9016-eee2c3acaec5` succeeded on Azure Static Web Apps (`sf-photo-metadata-queue`, East US 2), and the custom HTTPS URL is healthy.
+
+### Repair verification evidence
+
+- Before repair, the live candidate reproduced the report exactly: Tab focused `#photo-input`, `#csv-input`, and `#backup-input` at 1 px width; HTML and `sw.js` returned `max-age=30`; CSP, Permissions-Policy, and anti-framing headers were absent.
+- Clean `npm ci`: 60 packages installed, 0 vulnerabilities. `npm run typecheck`, `git diff --check`, and `npm run build` passed.
+- `npm test`: 10/10 Vitest tests passed, including exact deployment-policy assertions. `npm run test:e2e`: 5/5 Playwright 1.58.2 tests passed, including the desktop/mobile keyboard regression, workspace backup control, light/dark axe scans, CSV/XMP workflow, persistence, and offline reload.
+- Production build: 37,184 B JavaScript (13.08 KB gzip) and 17,940 B CSS (4.82 KB gzip), within the 200 KB / 50 KB budgets. `dist/index.html` is present.
+- Azure SWA emulator plus `npm run test:live -- http://127.0.0.1:4280/`: all 15 deployable artifacts matched, response policies passed, and `/privacy` plus `/terms` resolved to the SPA shell.
+- Browser checks: desktop 1366 × 900 and mobile 390 × 844 rendered without console/page errors; mobile had no horizontal overflow; reduced-motion transition duration was `0.00001s`; no cross-origin runtime requests occurred during the free workflow. A controlled worker change displayed “An update is ready.” Offline reload remained functional.
+- Axe found 0 serious/critical violations. The factory URL verifier found title, `lang="en"`, exactly one `<h1>`, `<main>`, complete image alt text, and no unlabeled buttons or console errors.
+- Lighthouse 13.4.1 mobile: Performance 100, Accessibility 100, Best Practices 100, SEO 100; FCP 1.0 s, LCP 1.6 s, TBT 0 ms, CLS 0, Speed Index 1.0 s.
+- Post-deploy `npm run test:live -- https://photo-metadata-queue.sociobot.in/`: all 15 files matched `dist/` byte-for-byte; headers, cache policy, manifest MIME, and legal routes passed. Chromium reported no installability errors, the visible “Choose photo folder” button received the 3 px focus ring, the live shell reloaded offline, and axe again found 0 serious/critical violations.
+
 ## Independent verification 1 — FAIL (2026-08-28 UTC)
 
 Candidate `b0607d39b25ac40fe38dd3b428ff172b641ab74d` was independently verified against <https://photo-metadata-queue.sociobot.in>. The live HTML, worker, manifest, assets, images, and icons matched the fresh production build byte-for-byte, so a deployment-only failure was not reproduced. Clean install, 8 unit tests, production type/build, 3 Playwright tests, axe serious/critical scans, PWA offline/update checks, and Lighthouse mobile (99/100/100/100) passed.
@@ -20,15 +42,17 @@ Candidate `b0607d39b25ac40fe38dd3b428ff172b641ab74d` was independently verified 
 ## How to run and verify
 
 ```sh
-npm install
+npm ci
+npm run typecheck
 npm test
 npm run build
 npm run test:e2e
+npm run test:live -- https://photo-metadata-queue.sociobot.in/
 ```
 
 Static output is `dist/`; `dist/index.html` is present at its root. The hosting layer should route extensionless paths such as `/privacy` and `/terms` to that file.
 
-Verification on 2026-08-28:
+Initial candidate verification on 2026-08-28 (superseded by Repair 2 evidence above):
 
 - `npm test`: 8 unit tests passed (CSV edge cases, XMP escaping/validation, sidecar naming, token rendering).
 - `npm run build`: passed with TypeScript strict checks; initial application assets are 36.7 KB JS and 17.8 KB CSS uncompressed (13.0 KB and 4.8 KB gzip).
@@ -41,5 +65,5 @@ Verification on 2026-08-28:
 
 - Bulk direct-to-folder writing uses Chromium's File System Access API. Firefox and Safari receive standards-valid individual browser downloads instead; browsers may request permission for multiple downloads.
 - Browser-only apps cannot decode every proprietary RAW format. Unsupported previews show a clear file tile while metadata editing and XMP output remain available.
-- The factory must register and smoke-test the production billing product/return URL. No product ID or payment-provider secret is embedded here.
+- The production license verification endpoint is live and returns `{ valid: false, reason: "invalid" }` for an invalid token. The hosted checkout endpoint currently returns HTTP 404 because the production billing product/return URL has not been registered; factory billing registration remains required. No product ID or payment-provider secret is embedded here.
 - INP has no lab value in Lighthouse; total blocking time was 0 ms. Collect field INP after deployment if the factory operates privacy-respecting aggregate performance monitoring.
