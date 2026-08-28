@@ -1,5 +1,13 @@
 # Caption Queue — build handoff
 
+## Independent verification 2 — FAIL (2026-08-28 UTC)
+
+Candidate `b5607cda09b3751607b467a7a2f61436b489e180` was independently verified from a clean detached checkout against <https://photo-metadata-queue.sociobot.in/>. The live deployment matches all 15 production artifacts byte-for-byte. Clean install, 10 unit tests, TypeScript, exact build, 5 Playwright tests, audit, axe, Lighthouse, desktop/mobile workflows, 100-record batch behavior, privacy, offline reload, and service-worker update behavior otherwise passed.
+
+**Release status is FAIL.** The advertised $24 “Buy Field edition” endpoint returns HTTP 404, so purchase is impossible. A 180-request verification-API burst completed in 1.951 seconds with 180 HTTP 200 responses and no 429/`Retry-After`, violating the explicit rate-limit gate. At 390 px, caption-token buttons are 36 px tall, keyword removal is 28 × 28 px, and the controlled-term add button is 38 × 44 px instead of the required 44 × 44 px.
+
+See `.factory/verification-2.md` for exact commands, measurements, response evidence, and remediation. This independent verdict supersedes the builder's Repair 2 PASS below. No product code was modified.
+
 ## Repair 2 — PASS (2026-08-28 UTC)
 
 All three release-blocking findings in verifier report commit `57edce66a9fbf80a228eb22ddb109140d203d8f4` are resolved in production.
