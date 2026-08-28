@@ -126,12 +126,12 @@ function workspace(): string {
 
 function queueRow(item: QueueItem, index: number): string {
   const errors = validateMetadata(item.metadata);
-  return `<li><button class="specimen-row ${item.id === activeItem()?.id ? 'active' : ''}" data-item="${item.id}" aria-current="${item.id === activeItem()?.id ? 'true' : 'false'}"><span class="row-number">${String(index + 1).padStart(3, '0')}</span><span class="row-thumb">${previewFor(item)}</span><span class="row-copy"><strong>${e(item.fileName)}</strong><small>${item.ready ? 'Ready to write' : errors.length ? `${errors.length} field${errors.length === 1 ? '' : 's'} needed` : 'Review needed'}</small></span><span class="row-state" aria-label="${item.ready ? 'Ready' : 'In progress'}">${item.ready ? icon('check') : '·'}</span></button></li>`;
+  return `<li><button class="specimen-row ${item.id === activeItem()?.id ? 'active' : ''}" data-item="${e(item.id)}" aria-current="${item.id === activeItem()?.id ? 'true' : 'false'}"><span class="row-number">${String(index + 1).padStart(3, '0')}</span><span class="row-thumb">${previewFor(item)}</span><span class="row-copy"><strong>${e(item.fileName)}</strong><small>${item.ready ? 'Ready to write' : errors.length ? `${errors.length} field${errors.length === 1 ? '' : 's'} needed` : 'Review needed'}</small></span><span class="row-state" aria-label="${item.ready ? 'Ready' : 'In progress'}">${item.ready ? icon('check') : '·'}</span></button></li>`;
 }
 
 function previewFor(item: QueueItem): string {
   const src = item.thumbnail || imageUrls.get(item.id);
-  return src ? `<img src="${e(src)}" alt="Preview of ${e(item.fileName)}">` : `<span class="file-placeholder">${icon('photo')}<small>${e(item.fileName.split('.').pop()?.toUpperCase())}</small></span>`;
+  return src ? `<img data-preview="${e(item.id)}" src="${e(src)}" alt="Preview of ${e(item.fileName)}">` : `<span class="file-placeholder">${icon('photo')}<small>${e(item.fileName.split('.').pop()?.toUpperCase())}</small></span>`;
 }
 
 function editorFields(item: QueueItem, shoot: Shoot): string {
@@ -155,7 +155,7 @@ function validationHeading(item: QueueItem): string { const n = validateMetadata
 function validationList(item: QueueItem): string { const list = validateMetadata(item.metadata); return list.length ? list.map((v) => `<li><span>○</span>${e(v)}</li>`).join('') : '<li class="valid"><span>✓</span>Required fields are present and XML-safe</li>'; }
 
 function batchDialog(shoot: Shoot, items: QueueItem[]): string {
-  return `<dialog id="batch-dialog"><form method="dialog" class="dialog-card"><header><div><span class="eyebrow">Batch annotation</span><h2>Apply to ${items.length} records</h2></div><button class="icon-button" value="cancel" aria-label="Close">×</button></header><p>Tokens render separately for each photo. Existing text is replaced; keywords are added.</p><label for="batch-title">Title pattern</label><input id="batch-title" placeholder="${e(shoot.name)} — {sequence}"><label for="batch-caption">Caption pattern</label><textarea id="batch-caption" rows="3" placeholder="Photograph from ${e(shoot.name)}."></textarea><label for="batch-keywords">Add keywords <span class="optional">semicolon separated</span></label><input id="batch-keywords"><label class="check-row"><input id="batch-unfinished" type="checkbox" checked> Only records not marked ready</label><footer><button class="quiet-button" value="cancel">Cancel</button><button class="primary-button" id="apply-batch" value="default">Preview & apply</button></footer></form></dialog>`;
+  return `<dialog id="batch-dialog"><form method="dialog" class="dialog-card"><header><div><span class="eyebrow">Batch annotation</span><h2>Apply to ${items.length} records</h2></div><button class="icon-button" value="cancel" aria-label="Close">×</button></header><p>Tokens render separately for each photo. Existing text is replaced; keywords are added.</p><label for="batch-title">Title pattern</label><input id="batch-title" placeholder="${e(shoot.name)} — {sequence}"><label for="batch-caption">Caption pattern</label><textarea id="batch-caption" rows="3" placeholder="Photograph from ${e(shoot.name)}."></textarea><label for="batch-keywords">Add keywords <span class="optional">semicolon separated</span></label><input id="batch-keywords"><label class="check-row"><input id="batch-unfinished" type="checkbox" checked> Only records not marked ready</label><footer><button class="quiet-button" value="cancel">Cancel</button><button class="primary-button" id="apply-batch" value="default">Apply changes</button></footer></form></dialog>`;
 }
 
 function licenseDialog(): string {
@@ -201,7 +201,7 @@ async function importPhotos(files: File[]): Promise<void> {
   const shoot: Shoot = { id: crypto.randomUUID(), name: root || `Shoot ${new Date().toLocaleDateString()}`, createdAt: Date.now(), vocabulary: [] };
   const items: QueueItem[] = accepted.map((file) => {
     const item: QueueItem = { id: crypto.randomUUID(), shootId: shoot.id, fileName: file.name, relativePath: (file as File & { webkitRelativePath?: string }).webkitRelativePath || file.name, mimeType: file.type, size: file.size, metadata: emptyMetadata(), ready: false, updatedAt: Date.now() };
-    imageUrls.set(item.id, URL.createObjectURL(file)); createThumbnail(file).then((thumb) => { if (thumb) { item.thumbnail = thumb; persist(); } }); return item;
+    const originalUrl = URL.createObjectURL(file); imageUrls.set(item.id, originalUrl); createThumbnail(file).then((thumb) => { if (thumb) { item.thumbnail = thumb; document.querySelectorAll<HTMLImageElement>(`img[data-preview="${CSS.escape(item.id)}"]`).forEach((image) => { image.src = thumb; }); persist(); } imageUrls.delete(item.id); URL.revokeObjectURL(originalUrl); }); return item;
   });
   data.shoots.push(shoot); data.items.push(...items); data.activeShootId = shoot.id; data.activeItemId = items[0].id; await persist(); history.pushState({}, '', '/'); render();
 }

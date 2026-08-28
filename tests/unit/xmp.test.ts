@@ -10,11 +10,12 @@ const item = (overrides = {}): QueueItem => ({
 
 describe('XMP writer', () => {
   it('escapes XML values and preserves IPTC structures', () => {
-    const xmp = makeXmp(item());
+    const xmp = makeXmp(item({ title: 'Bird & branch\u0003' }));
     expect(xmp).toContain('Bird &amp; branch');
     expect(xmp).toContain('A &lt;quiet&gt; moment');
     expect(xmp).toContain('red &quot;wing&quot;');
     expect(xmp).toContain('O&apos;Neil');
+    expect(xmp).not.toContain('\u0003');
     expect(xmp).toContain('<rdf:Bag>');
   });
 

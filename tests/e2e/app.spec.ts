@@ -29,6 +29,8 @@ test('imports a CSV, edits a record, and exports valid XMP', async ({ page }) =>
 });
 
 test('landing and editor have no serious axe violations', async ({ page }) => {
+  const consoleErrors: string[] = [];
+  page.on('console', (message) => { if (message.type() === 'error') consoleErrors.push(message.text()); });
   let results = await new AxeBuilder({ page }).analyze();
   expect(results.violations.filter((v) => ['serious', 'critical'].includes(v.impact ?? ''))).toEqual([]);
   await page.locator('#csv-input').setInputFiles({ name: 'wetlands.csv', mimeType: 'text/csv', buffer: Buffer.from(csv) });
@@ -37,14 +39,19 @@ test('landing and editor have no serious axe violations', async ({ page }) => {
   await page.getByRole('button', { name: 'Change color theme' }).click();
   results = await new AxeBuilder({ page }).analyze();
   expect(results.violations.filter((v) => ['serious', 'critical'].includes(v.impact ?? ''))).toEqual([]);
+  expect(await page.locator('h1').count()).toBe(1);
+  expect(consoleErrors).toEqual([]);
 });
 
 test('installed shell reopens offline at mobile width', async ({ page, context }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');
+  await page.locator('#csv-input').setInputFiles({ name: 'wetlands.csv', mimeType: 'text/csv', buffer: Buffer.from(csv) });
+  await expect(page.getByRole('heading', { name: 'wetlands', level: 1 })).toBeVisible();
   await page.waitForFunction(() => navigator.serviceWorker?.controller !== null);
   await context.setOffline(true);
   await page.reload();
-  await expect(page.getByRole('heading', { name: /Caption the shoot/ })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'wetlands', level: 1 })).toBeVisible();
+  await expect(page.getByText('IMG_0001.jpg', { exact: true }).first()).toBeVisible();
   await expect(page.locator('main')).toBeVisible();
 });
