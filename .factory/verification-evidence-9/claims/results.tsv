@@ -1,0 +1,17 @@
+demo-sandbox	0	npm run test:e2e -- --grep @claim:demo-sandbox
+offline-reload	0	npm run test:e2e -- --grep @claim:offline-reload
+local-privacy	0	npm run test:e2e -- --grep @claim:local-privacy
+xmp-export	0	npm run test:e2e -- --grep @claim:xmp-export
+photo-import	0	npm run test:e2e -- --grep @claim:photo-import
+metadata-tools	0	npm run test:e2e -- --grep @claim:metadata-tools
+bulk-xmp	0	npm run test:e2e -- --grep @claim:bulk-xmp
+free-limit	0	npm run test:e2e -- --grep @claim:free-limit
+field-edition	0	npm run test:e2e -- --grep @claim:field-edition
+local-persistence	0	npm run test:e2e -- --grep @claim:local-persistence
+csv-export	0	npm run test:e2e -- --grep @claim:csv-export
+backup-restore	0	npm run test:e2e -- --grep @claim:backup-restore
+backup-cross-browser	0	npm run test:e2e -- --grep @claim:backup-cross-browser
+direct-sidecar-write	0	npm run test:e2e -- --grep @claim:direct-sidecar-write
+keyboard-save-next	0	npm run test:e2e -- --grep @claim:keyboard-save-next
+license-verification-privacy	0	npm run test:e2e -- --grep @claim:license-verification-privacy
+keyboard-controls	0	npm run test:e2e -- --grep @claim:keyboard-controls

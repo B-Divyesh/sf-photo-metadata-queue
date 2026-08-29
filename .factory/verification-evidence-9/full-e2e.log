@@ -1,0 +1,48 @@
+
+> photo-metadata-queue@1.0.0 test:e2e
+> playwright test --reporter=list
+
+[WebServer] (node:4047) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:4078) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 31 tests using 1 worker
+
+(node:4096) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:4096) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 tests/e2e/app.spec.ts:24:1 › imports a CSV, edits a record, and exports valid XMP (4.1s)
+  ✓   2 tests/e2e/app.spec.ts:40:1 › a first license verification accepts only a valid verdict (4.3s)
+  ✓   3 tests/e2e/app.spec.ts:91:1 › only a fresh cached valid verdict stays unlocked during a verification outage (1.5s)
+  ✓   4 tests/e2e/app.spec.ts:111:1 › landing and editor have no serious axe violations (4.9s)
+  ✓   5 tests/e2e/app.spec.ts:126:1 › keyboard focus reaches visible import buttons and each activates its file picker on desktop and mobile (3.2s)
+  ✓   6 tests/e2e/app.spec.ts:155:1 › workspace backup import uses the same visible keyboard control (3.7s)
+  ✓   7 tests/e2e/app.spec.ts:167:1 › mobile editor touch controls meet the 44px target contract (1.0s)
+  ✓   8 tests/e2e/app.spec.ts:189:1 › all visible mobile links and buttons meet the 44px touch target contract (1.3s)
+  ✓   9 tests/e2e/app.spec.ts:208:1 › transient mobile toast actions meet the 44px touch target contract (2.8s)
+  ✓  10 tests/e2e/app.spec.ts:254:1 › primary routes reflow without horizontal scrolling at 200 percent text size (1.4s)
+  ✓  11 tests/e2e/app.spec.ts:264:1 › unfinished metadata moves focus to its validation summary (1.3s)
+  ✓  12 tests/e2e/app.spec.ts:273:1 › closed mobile queue is inert and opening it manages keyboard focus (1.0s)
+  ✓  13 tests/e2e/app.spec.ts:289:1 › installed shell reopens offline at mobile width (1.3s)
+  ✓  14 tests/e2e/app.spec.ts:302:1 › installed shell announces a waiting service-worker update (1.0s)
+  ✓  15 tests/e2e/claims.spec.ts:40:1 › @claim:demo-sandbox sample mode is one click, isolated, resettable, and discardable (2.0s)
+  ✓  16 tests/e2e/claims.spec.ts:79:1 › @claim:offline-reload demo and saved real queues reopen offline after the first visit (2.2s)
+  ✓  17 tests/e2e/claims.spec.ts:109:1 › @claim:local-privacy free demo editing and export make same-origin requests only (1.2s)
+  ✓  18 tests/e2e/claims.spec.ts:121:1 › @claim:xmp-export exported sample XMP is well formed and escapes XML-sensitive text (1.2s)
+  ✓  19 tests/e2e/claims.spec.ts:130:1 › @claim:photo-import selected photos become queue records when previews cannot be decoded (1.4s)
+  ✓  20 tests/e2e/claims.spec.ts:139:1 › @claim:metadata-tools tokens, terms, and validation update demo metadata (2.1s)
+  ✓  21 tests/e2e/claims.spec.ts:154:1 › @claim:bulk-xmp write the set downloads one sidecar per sample record (1.4s)
+  ✓  22 tests/e2e/claims.spec.ts:163:1 › @claim:free-limit free mode accepts 25 records and rejects 26 (1.4s)
+  ✓  23 tests/e2e/claims.spec.ts:175:1 › @claim:field-edition shows the one-time price and enables unlimited imports, saved shoots, and batch patterns with a valid license fixture (2.4s)
+  ✓  24 tests/e2e/claims.spec.ts:203:1 › @claim:local-persistence a demo metadata edit survives reload (1.2s)
+  ✓  25 tests/e2e/claims.spec.ts:220:1 › @claim:csv-export metadata CSV has its header and one row per sample record (1.2s)
+  ✓  26 tests/e2e/claims.spec.ts:229:1 › @claim:backup-restore an exported demo backup restores changed records (1.2s)
+  ✓  27 tests/e2e/claims.spec.ts:239:1 › @claim:backup-cross-browser a JSON backup restores into a separate fresh browser workspace (1.8s)
+  ✓  28 tests/e2e/claims.spec.ts:259:1 › @claim:direct-sidecar-write compatible directory handles receive one XMP sidecar for every queue record (1.1s)
+  ✓  29 tests/e2e/claims.spec.ts:281:1 › @claim:keyboard-save-next queue controls and Ctrl+Enter move and save a record (3.6s)
+  ✓  30 tests/e2e/claims.spec.ts:297:1 › @claim:license-verification-privacy paid verification sends the pasted token as its only request value (1.1s)
+  ✓  31 tests/e2e/claims.spec.ts:318:1 › @claim:keyboard-controls queue movement and a landing import control are keyboard operable (1.7s)
+
+  31 passed (1.2m)

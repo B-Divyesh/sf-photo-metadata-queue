@@ -1,0 +1,27 @@
+{
+  "demo": {
+    "records": 3,
+    "readyInitially": "2 of 3",
+    "banner": true
+  },
+  "validation": {
+    "live": "2 required items remain. Add a title.",
+    "focused": true
+  },
+  "acceptedBoundaries": {
+    "titleCharacters": 256,
+    "captionCharacters": 2000,
+    "readyAfterRecovery": "3 of 3"
+  },
+  "xmp": {
+    "filename": "BIRDS_1842.xmp",
+    "parsed": true,
+    "escapedSensitiveText": true
+  },
+  "csvRowsIncludingHeader": 4,
+  "invalidBackup": {
+    "message": "Expected property name or '}' in JSON at position 1 (line 1 column 2)×",
+    "recordsRetained": 3
+  },
+  "errors": []
+}

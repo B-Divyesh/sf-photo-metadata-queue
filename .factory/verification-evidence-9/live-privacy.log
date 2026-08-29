@@ -1,0 +1,53 @@
+{
+  "freeWorkflow": {
+    "origins": [
+      "https://photo-metadata-queue.sociobot.in"
+    ],
+    "requests": [
+      {
+        "method": "GET",
+        "url": "https://photo-metadata-queue.sociobot.in/demo",
+        "type": "document",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "https://photo-metadata-queue.sociobot.in/assets/field-desk.webp",
+        "type": "image",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "https://photo-metadata-queue.sociobot.in/assets/index-a3wia0ks.js",
+        "type": "script",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "https://photo-metadata-queue.sociobot.in/assets/index-DtnRdKor.css",
+        "type": "stylesheet",
+        "postData": null
+      }
+    ],
+    "downloads": [
+      "XMP",
+      "CSV"
+    ],
+    "errors": []
+  },
+  "license": {
+    "request": {
+      "method": "GET",
+      "url": "https://api.sociobot.in/api/v1/products/photo-metadata-queue/verify?license=verification-9-browser-token",
+      "postData": null
+    },
+    "queryKeys": [
+      "license"
+    ],
+    "status": 200,
+    "ui": "That license is not active. Check the token and try again.",
+    "scriptOrigins": [
+      "https://photo-metadata-queue.sociobot.in"
+    ]
+  }
+}

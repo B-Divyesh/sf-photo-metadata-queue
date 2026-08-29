@@ -1,0 +1,25 @@
+{
+  "missingFilenameHeader": "Add a filename column to the CSV.",
+  "blankFilename": "Row 2 has no filename.",
+  "recovery": {
+    "shoot": "quoted",
+    "records": 2,
+    "quotedComma": true,
+    "embeddedNewline": true
+  },
+  "freeLimit": {
+    "rejected": 26,
+    "accepted": 25,
+    "rejection": "This CSV has more than 25 records. Unlock Field edition or import a smaller manifest.×"
+  },
+  "photoFolder": {
+    "records": 2,
+    "names": [
+      "RAW_PROXY_001.JPG",
+      "RAW_PROXY_002.JPG"
+    ],
+    "requestOrigins": [
+      "https://photo-metadata-queue.sociobot.in"
+    ]
+  }
+}

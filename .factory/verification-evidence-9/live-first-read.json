@@ -1,0 +1,136 @@
+{
+  "status": 200,
+  "headers": {
+    "cache-control": "no-cache, no-store, must-revalidate",
+    "content-encoding": "br",
+    "content-security-policy": "default-src 'self'; base-uri 'self'; connect-src 'self' https://api.sociobot.in; font-src 'self'; form-action 'self' https://api.sociobot.in; frame-ancestors 'none'; img-src 'self' blob: data:; manifest-src 'self'; object-src 'none'; script-src 'self'; style-src 'self'; worker-src 'self'",
+    "content-type": "text/html",
+    "cross-origin-opener-policy": "same-origin",
+    "cross-origin-resource-policy": "same-origin",
+    "date": "Sat, 29 Aug 2026 19:43:24 GMT",
+    "etag": "\"98320087\"",
+    "last-modified": "Sat, 29 Aug 2026 19:15:21 GMT",
+    "permissions-policy": "camera=(), geolocation=(), microphone=(), payment=(), usb=()",
+    "referrer-policy": "strict-origin-when-cross-origin",
+    "strict-transport-security": "max-age=10886400; includeSubDomains; preload",
+    "vary": "Accept-Encoding",
+    "x-content-type-options": "nosniff",
+    "x-dns-prefetch-control": "off",
+    "x-frame-options": "DENY",
+    "x-xss-protection": "1; mode=block"
+  },
+  "result": {
+    "title": "Caption Queue — Write photo metadata offline",
+    "url": "https://photo-metadata-queue.sociobot.in/",
+    "viewportText": [
+      "Caption Queue",
+      "Demo",
+      "Privacy",
+      "◐",
+      "View pricing",
+      "Local photo metadata queue",
+      "Caption large shoots without changing originals",
+      "For photographers with large shoots, it turns folders or CSV files into a focused queue for clean XMP sidecars.",
+      "Try it with sample data",
+      "Opens three edited sample records.",
+      "Import CSV",
+      "Restore backup",
+      "Runs offline after the first visit.",
+      "Photos and metadata stay on this device.",
+      "Free for 25 records per shoot. Field edition costs $24 once.",
+      "Plate 01"
+    ],
+    "h1": [
+      "Caption large shoots without changing originals"
+    ],
+    "buttons": [
+      "◐",
+      "View pricing",
+      "Choose photo folder",
+      "Import CSV",
+      "Restore backup",
+      "View Field edition",
+      "×",
+      "Verify license"
+    ],
+    "links": [
+      {
+        "text": "Skip to main content",
+        "href": "https://photo-metadata-queue.sociobot.in/#main"
+      },
+      {
+        "text": "Caption Queue",
+        "href": "https://photo-metadata-queue.sociobot.in/"
+      },
+      {
+        "text": "Demo",
+        "href": "https://photo-metadata-queue.sociobot.in/demo"
+      },
+      {
+        "text": "Privacy",
+        "href": "https://photo-metadata-queue.sociobot.in/privacy"
+      },
+      {
+        "text": "Try it with sample data",
+        "href": "https://photo-metadata-queue.sociobot.in/demo"
+      },
+      {
+        "text": "Read the privacy details",
+        "href": "https://photo-metadata-queue.sociobot.in/privacy"
+      },
+      {
+        "text": "Demo",
+        "href": "https://photo-metadata-queue.sociobot.in/demo"
+      },
+      {
+        "text": "Privacy",
+        "href": "https://photo-metadata-queue.sociobot.in/privacy"
+      },
+      {
+        "text": "Terms",
+        "href": "https://photo-metadata-queue.sociobot.in/terms"
+      },
+      {
+        "text": "Source",
+        "href": "https://github.com/B-Divyesh/sf-photo-metadata-queue"
+      },
+      {
+        "text": "Buy Field edition",
+        "href": "https://api.sociobot.in/api/v1/products/photo-metadata-queue/checkout"
+      },
+      {
+        "text": "terms",
+        "href": "https://photo-metadata-queue.sociobot.in/terms"
+      },
+      {
+        "text": "privacy",
+        "href": "https://photo-metadata-queue.sociobot.in/privacy"
+      }
+    ],
+    "main": true,
+    "lang": "en"
+  },
+  "requests": [
+    {
+      "method": "GET",
+      "url": "https://photo-metadata-queue.sociobot.in/",
+      "type": "document"
+    },
+    {
+      "method": "GET",
+      "url": "https://photo-metadata-queue.sociobot.in/assets/field-desk.webp",
+      "type": "image"
+    },
+    {
+      "method": "GET",
+      "url": "https://photo-metadata-queue.sociobot.in/assets/index-a3wia0ks.js",
+      "type": "script"
+    },
+    {
+      "method": "GET",
+      "url": "https://photo-metadata-queue.sociobot.in/assets/index-DtnRdKor.css",
+      "type": "stylesheet"
+    }
+  ],
+  "errors": []
+}

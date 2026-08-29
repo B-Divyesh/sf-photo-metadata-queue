@@ -1,0 +1,119 @@
+{
+  "mobileFirstRead": {
+    "boxes": [
+      {
+        "text": "Caption large shoots without changing originals",
+        "box": {
+          "x": 16,
+          "y": 174.1875,
+          "width": 358,
+          "height": 128.296875
+        }
+      },
+      {
+        "text": "For photographers with large shoots, it turns folders or CSV files into a focused queue for clean XMP sidecars.",
+        "box": {
+          "x": 16,
+          "y": 331.421875,
+          "width": 358,
+          "height": 88.3125
+        }
+      },
+      {
+        "text": "Try it with sample data",
+        "box": {
+          "x": 16,
+          "y": 451.734375,
+          "width": 358,
+          "height": 44
+        }
+      },
+      {
+        "text": "Opens three edited sample records.",
+        "box": {
+          "x": 16,
+          "y": 507.734375,
+          "width": 358,
+          "height": 17.71875
+        }
+      },
+      {
+        "text": "Runs offline after the first visit.",
+        "box": {
+          "x": 16,
+          "y": 713.453125,
+          "width": 358,
+          "height": 16
+        }
+      },
+      {
+        "text": "Photos and metadata stay on this device.",
+        "box": {
+          "x": 16,
+          "y": 736.640625,
+          "width": 358,
+          "height": 16
+        }
+      },
+      {
+        "text": "Free for 25 records per shoot. Field edition costs $24 once.",
+        "box": {
+          "x": 16,
+          "y": 759.828125,
+          "width": 358,
+          "height": 32
+        }
+      }
+    ],
+    "scrollWidth": 390
+  },
+  "keyboard": {
+    "skipFocus": {
+      "width": 198.578125,
+      "height": 44,
+      "outline": "rgb(179, 79, 22) solid 3px",
+      "outlineColor": "rgb(179, 79, 22)"
+    },
+    "tabOrder": [
+      {
+        "text": "Try it with sample data",
+        "outline": "rgb(179, 79, 22) solid 3px"
+      },
+      {
+        "text": "Choose photo folder",
+        "outline": "rgb(179, 79, 22) solid 3px"
+      },
+      {
+        "text": "Import CSV",
+        "outline": "rgb(179, 79, 22) solid 3px"
+      }
+    ],
+    "importActivatedByEnter": true
+  },
+  "mobileDemo": {
+    "navigation": {
+      "first": "BIRDS_1842.JPG",
+      "second": "BIRDS_1843.JPG",
+      "back": "BIRDS_1842.JPG"
+    },
+    "validationFocus": true,
+    "ctrlEnterReady": true,
+    "seriousCritical": [],
+    "undersized": [],
+    "motion": {
+      "reduced": true,
+      "transitionDuration": "1e-05s",
+      "animationDuration": "1e-05s"
+    },
+    "reflow": {
+      "viewport": 390,
+      "scrollWidth": 390
+    }
+  },
+  "offline": {
+    "retained": "Fresh live offline evidence",
+    "status": "Offline · work is saved",
+    "mainVisible": true
+  },
+  "errors": []
+}

@@ -1,0 +1,16 @@
+
+> photo-metadata-queue@1.0.0 test
+> vitest run
+
+
+ RUN  v3.2.7 /work/repo
+
+ ✓ tests/unit/static-config.test.ts (3 tests) 5ms
+ ✓ tests/unit/factory-artifacts.test.ts (4 tests) 89ms
+ ✓ tests/unit/xmp.test.ts (4 tests) 8ms
+ ✓ tests/unit/csv.test.ts (4 tests) 7ms
+
+ Test Files  4 passed (4)
+      Tests  15 passed (15)
+   Start at  19:43:53
+   Duration  4.31s (transform 903ms, setup 0ms, collect 1.21s, tests 110ms, environment 2ms, prepare 1.90s)

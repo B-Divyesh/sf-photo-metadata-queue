@@ -1,0 +1,52 @@
+[
+  {
+    "url": "https://photo-metadata-queue.sociobot.in/#main",
+    "status": 200,
+    "location": null
+  },
+  {
+    "url": "https://photo-metadata-queue.sociobot.in/",
+    "status": 200,
+    "location": null
+  },
+  {
+    "url": "https://photo-metadata-queue.sociobot.in/demo",
+    "status": 200,
+    "location": null
+  },
+  {
+    "url": "https://photo-metadata-queue.sociobot.in/privacy",
+    "status": 200,
+    "location": null
+  },
+  {
+    "url": "https://photo-metadata-queue.sociobot.in/terms",
+    "status": 200,
+    "location": null
+  },
+  {
+    "url": "https://github.com/B-Divyesh/sf-photo-metadata-queue",
+    "status": 200,
+    "location": null
+  },
+  {
+    "url": "https://api.sociobot.in/api/v1/products/photo-metadata-queue/checkout",
+    "status": 303,
+    "location": "https://checkout.dodopayments.com/session/<redacted-ephemeral-session>"
+  },
+  {
+    "url": "https://photo-metadata-queue.sociobot.in/demo#main",
+    "status": 200,
+    "location": null
+  },
+  {
+    "url": "https://photo-metadata-queue.sociobot.in/privacy#main",
+    "status": 200,
+    "location": null
+  },
+  {
+    "url": "https://photo-metadata-queue.sociobot.in/terms#main",
+    "status": 200,
+    "location": null
+  }
+]

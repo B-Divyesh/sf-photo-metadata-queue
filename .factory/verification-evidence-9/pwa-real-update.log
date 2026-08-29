@@ -1,0 +1,45 @@
+server v1 /demo
+server v1 /assets/field-desk.webp
+server v1 /assets/index-DtnRdKor.css
+server v1 /assets/index-a3wia0ks.js
+server v1 /sw.js
+server v1 /
+server v1 /index.html
+server v1 /demo
+server v1 /offline.html
+server v1 /404.html
+server v1 /manifest.webmanifest
+server v1 /assets/icon.svg
+server v1 /assets/field-desk-mobile.webp
+server v1 /assets/field-desk.webp
+server v1 /assets/social-card.jpg
+server v1 /assets/404.css
+server v1 /assets/offline.css
+server v2 /sw.js
+server v2 /
+server v2 /index.html
+server v2 /demo
+server v2 /offline.html
+server v2 /404.html
+server v2 /manifest.webmanifest
+server v2 /assets/icon.svg
+server v2 /assets/field-desk.webp
+server v2 /assets/field-desk-mobile.webp
+server v2 /assets/social-card.jpg
+server v2 /assets/404.css
+server v2 /assets/offline.css
+waiting worker ready
+server v2 /demo
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+page.waitForNavigation: Timeout 30000ms exceeded.
+=========================== logs ===========================
+waiting for navigation until "domcontentloaded"
+============================================================
+    at /work/repo/.factory/verification-evidence-9/pwa-real-update.mjs:44:8 {
+  name: 'TimeoutError'
+}
+
+Node.js v22.23.2

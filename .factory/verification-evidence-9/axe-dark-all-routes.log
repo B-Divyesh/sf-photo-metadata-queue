@@ -1,0 +1,42 @@
+[
+  {
+    "viewport": 1366,
+    "path": "/",
+    "seriousCritical": []
+  },
+  {
+    "viewport": 1366,
+    "path": "/demo",
+    "seriousCritical": []
+  },
+  {
+    "viewport": 1366,
+    "path": "/privacy",
+    "seriousCritical": []
+  },
+  {
+    "viewport": 1366,
+    "path": "/terms",
+    "seriousCritical": []
+  },
+  {
+    "viewport": 390,
+    "path": "/",
+    "seriousCritical": []
+  },
+  {
+    "viewport": 390,
+    "path": "/demo",
+    "seriousCritical": []
+  },
+  {
+    "viewport": 390,
+    "path": "/privacy",
+    "seriousCritical": []
+  },
+  {
+    "viewport": 390,
+    "path": "/terms",
+    "seriousCritical": []
+  }
+]

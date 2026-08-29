@@ -1,0 +1,7 @@
+HTTP/2 303
+date: Sat, 29 Aug 2026 19:52:57 GMT
+access-control-allow-credentials: true
+location: https://checkout.dodopayments.com/session/<redacted-ephemeral-session>
+[set-cookie headers omitted from committed evidence]
+vary: origin, access-control-request-method, access-control-request-headers
+content-length: 0
