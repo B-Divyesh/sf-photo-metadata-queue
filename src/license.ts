@@ -3,6 +3,7 @@ const KEY = `sb_license:${SLUG}`;
 const VERDICT = `${KEY}:verdict`;
 const RETRY_AT = `${KEY}:retry-at`;
 const VERDICT_MAX_AGE = 86_400_000;
+const DEFAULT_RETRY_AFTER_SECONDS = 4;
 
 export const checkoutUrl = `https://api.sociobot.in/api/v1/products/${SLUG}/checkout`;
 
@@ -28,11 +29,11 @@ function hasFreshValidVerdict(): boolean {
 }
 
 function retryAfterSeconds(header: string | null): number {
-  if (!header) return 60;
+  if (!header) return DEFAULT_RETRY_AFTER_SECONDS;
   const numeric = Number(header);
   if (Number.isFinite(numeric) && numeric >= 0) return Math.max(1, Math.ceil(numeric));
   const retryAt = Date.parse(header);
-  return Number.isNaN(retryAt) ? 60 : Math.max(1, Math.ceil((retryAt - Date.now()) / 1000));
+  return Number.isNaN(retryAt) ? DEFAULT_RETRY_AFTER_SECONDS : Math.max(1, Math.ceil((retryAt - Date.now()) / 1000));
 }
 
 function currentRetryAfter(): number | null {

@@ -135,7 +135,7 @@ function workspace(): string {
       <article class="annotation-sheet">
         <header class="specimen-header"><div class="thumb">${previewFor(current)}</div><div><p class="accession">Specimen ${String(position + 1).padStart(3, '0')} / ${String(items.length).padStart(3, '0')}</p><h2>${e(current.fileName)}</h2><p>${current.size ? formatBytes(current.size) : 'CSV record'} · ${e(current.relativePath)}</p></div><span class="status-badge ${current.ready ? 'is-ready' : ''}">${current.ready ? `${icon('check')} Ready` : 'In progress'}</span></header>
         <form id="metadata-form" novalidate>${editorFields(current, shoot)}
-          <section class="validation" aria-labelledby="validation-title"><div><span class="eyebrow">Validation ledger</span><h3 id="validation-title">${validationHeading(current)}</h3></div><ul id="validation-list">${validationList(current)}</ul></section>
+          <section class="validation" aria-labelledby="validation-title" tabindex="-1"><div><span class="eyebrow">Validation ledger</span><h3 id="validation-title">${validationHeading(current)}</h3></div><ul id="validation-list">${validationList(current)}</ul></section>
           <details class="xmp-preview"><summary>Inspect XMP output <span>Escaped XML</span></summary><pre><code id="xmp-code">${e(makeXmp(current))}</code></pre></details>
           <div class="editor-actions"><button type="button" class="secondary-button" id="export-one">${icon('download')} Export this XMP</button><button type="submit" class="primary-button">${current.ready ? 'Save & next' : `${icon('check')} Mark ready & next`}</button></div>
           <p class="shortcut">Keyboard: <kbd>⌘/Ctrl</kbd> + <kbd>Enter</kbd> saves and advances. <kbd>J</kbd>/<kbd>K</kbd> moves the queue.</p>
@@ -266,7 +266,7 @@ function bindCommon(): void {
 
 function licenseMessage(result: LicenseCheck): string {
   if (result.status === 'network') return 'Could not verify this license right now. Check your connection and try again.';
-  if (result.status === 'rate-limited') return `The license service asked us to wait ${result.retryAfterSeconds ?? 60} seconds before retrying.`;
+  if (result.status === 'rate-limited') return `The license service asked us to wait ${result.retryAfterSeconds ?? 4} seconds before retrying.`;
   return 'That license is not active. Check the token and try again.';
 }
 

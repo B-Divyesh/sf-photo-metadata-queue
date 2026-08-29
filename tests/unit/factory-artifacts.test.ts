@@ -28,6 +28,10 @@ describe('factory verification artifacts', () => {
     expect(playwrightConfig).toContain('reuseExistingServer: false');
   });
 
+  it('serializes browser tests that share origin-scoped service-worker state', () => {
+    expect(playwrightConfig).toContain('workers: 1');
+  });
+
   it('ships canonical, social-card, and mobile-icon metadata', () => {
     expect(html).toContain('rel="canonical"');
     expect(html).toContain('property="og:image"');

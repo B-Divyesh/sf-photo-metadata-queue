@@ -1,4 +1,4 @@
-const VERSION = 'caption-queue-v2';
+const VERSION = 'caption-queue-v3';
 const SHELL = ['/', '/index.html', '/demo', '/offline.html', '/404.html', '/manifest.webmanifest', '/assets/icon.svg', '/assets/field-desk.webp', '/assets/field-desk-mobile.webp', '/assets/social-card.jpg', '/assets/404.css', '/assets/offline.css'];
 self.addEventListener('install', (event) => event.waitUntil(caches.open(VERSION).then((cache) => cache.addAll(SHELL))));
 self.addEventListener('activate', (event) => event.waitUntil(Promise.all([caches.keys().then((keys) => Promise.all(keys.filter((key) => key !== VERSION).map((key) => caches.delete(key)))), self.clients.claim()])));

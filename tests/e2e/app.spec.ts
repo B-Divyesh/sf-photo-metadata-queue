@@ -53,6 +53,11 @@ test('a first license verification accepts only a valid verdict', async ({ page 
       name: 'rate limit',
       fulfill: { status: 429, headers: { 'Retry-After': '4', 'Access-Control-Expose-Headers': 'Retry-After' } },
       message: 'The license service asked us to wait 4 seconds before retrying.'
+    },
+    {
+      name: 'rate limit without an exposed header',
+      fulfill: { status: 429, headers: { 'Retry-After': '4', 'Access-Control-Expose-Headers': 'X-Unrelated' } },
+      message: 'The license service asked us to wait 4 seconds before retrying.'
     }
   ];
 
@@ -71,7 +76,7 @@ test('a first license verification accepts only a valid verdict', async ({ page 
     await expect(page.getByText('Field edition is active')).toHaveCount(0);
     expect(verificationRequests).toBe(1);
 
-    if (scenario.name === 'rate limit') {
+    if (scenario.name.startsWith('rate limit')) {
       await page.getByRole('button', { name: 'Verify license' }).click();
       await expect(page.locator('#license-message')).toHaveText(scenario.message);
       expect(verificationRequests).toBe(1);
@@ -179,6 +184,44 @@ test('mobile editor touch controls meet the 44px target contract', async ({ page
     }
   }
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+});
+
+test('all visible mobile links and buttons meet the 44px touch target contract', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  for (const path of ['/', '/demo', '/privacy', '/terms']) {
+    await page.goto(path);
+    const undersized = await page.locator('a[href], button').evaluateAll((elements) => elements
+      .filter((element) => {
+        const style = getComputedStyle(element);
+        const box = element.getBoundingClientRect();
+        return style.display !== 'none' && style.visibility !== 'hidden' && box.width > 0 && box.height > 0;
+      })
+      .map((element) => {
+        const box = element.getBoundingClientRect();
+        return { label: element.getAttribute('aria-label') || element.textContent?.trim() || element.tagName, width: box.width, height: box.height };
+      })
+      .filter(({ width, height }) => width < 44 || height < 44));
+    expect(undersized, `${path} has undersized touch targets`).toEqual([]);
+  }
+});
+
+test('primary routes reflow without horizontal scrolling at 200 percent text size', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  for (const path of ['/', '/demo', '/privacy', '/terms']) {
+    await page.goto(path);
+    await page.evaluate(() => { document.documentElement.style.fontSize = '200%'; });
+    await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth)).toBe(390);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), `${path} should reflow at 200% text`).toBe(true);
+  }
+});
+
+test('unfinished metadata moves focus to its validation summary', async ({ page }) => {
+  await page.goto('/demo');
+  await page.getByRole('button', { name: /BIRDS_1844.JPG/ }).click();
+  await page.getByRole('button', { name: 'Mark ready & next' }).click();
+  await expect(page.locator('.validation')).toBeFocused();
+  await expect(page.locator('.validation')).toHaveCSS('outline-width', '3px');
+  await expect(page.locator('#live')).toHaveText('2 required items remain. Add a title.');
 });
 
 test('closed mobile queue is inert and opening it manages keyboard focus', async ({ page }) => {
