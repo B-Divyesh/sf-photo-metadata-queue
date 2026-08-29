@@ -16,6 +16,12 @@ const app = document.querySelector<HTMLDivElement>('#app')!;
 const demoEntry = () => location.pathname === '/demo' || new URLSearchParams(location.search).get('demo') === '1';
 let demoMode = demoEntry();
 if (demoMode && location.pathname !== '/demo') history.replaceState({}, '', '/demo');
+type RouteState = { cqEntry?: string; scrollX?: number; scrollY?: number };
+history.scrollRestoration = 'manual';
+const initialState = history.state as RouteState | null;
+if (!initialState?.cqEntry) history.replaceState({ cqEntry: crypto.randomUUID(), scrollX: window.scrollX, scrollY: window.scrollY }, '', location.href);
+let restoringScroll = false;
+let scrollFrame = 0;
 let data: AppData = await loadData(demoMode ? 'demo' : 'real');
 if (demoMode && !data.items.length) {
   data = createDemoData();
@@ -89,7 +95,7 @@ function landing(): string {
   return shell(`<main id="main" class="landing">
     <section class="hero">
       <div class="hero-copy"><p class="eyebrow">Local photo metadata queue</p><h1>Caption large shoots without changing originals</h1>
-        <p class="lede">For photographers with large shoots, it turns folders or CSV files into a focused queue for clean XMP sidecars.</p>
+        <p class="lede">For photographers with large shoots, it turns folders or CSV files into a queue and writes separate XMP metadata files.</p>
         <div class="hero-actions">
           <a class="primary-button" href="/demo" data-nav>Try it with sample data</a>
           <span class="action-note">Opens three edited sample records.</span>
@@ -102,12 +108,12 @@ function landing(): string {
         <input class="sr-only" id="backup-input" type="file" accept=".json,application/json" tabindex="-1" aria-hidden="true" />
         <ul class="fact-list"><li>Runs offline after the first visit.</li><li>Photos and metadata stay on this device.</li><li>Free for 25 records per shoot. Field edition costs $24 once.</li></ul>
       </div>
-      <figure class="hero-plate"><picture><source media="(max-width: 680px)" srcset="/assets/field-desk-mobile.webp"><img src="/assets/field-desk.webp" width="1200" height="800" alt="A blank herbarium sheet with a fern, archival sleeves, and an empty contact sheet arranged on a wooden worktable" decoding="async" fetchpriority="high"></picture><figcaption><span>Plate 01</span> From contact sheet to catalog record</figcaption></figure>
+      <figure class="hero-plate"><picture><source media="(max-width: 680px)" srcset="/assets/field-desk-mobile.webp"><img src="/assets/field-desk.webp" width="1200" height="800" alt="A blank herbarium sheet with a fern, archival sleeves, and an empty contact sheet arranged on a wooden worktable" decoding="async" fetchpriority="high"></picture></figure>
     </section>
-    <section class="workflow" aria-labelledby="workflow-title"><div><p class="eyebrow">How it works</p><h2 id="workflow-title">Move one photograph at a time</h2><p>Keep one shoot in view. Reuse its terms, check every record, then send clean sidecars to your DAM.</p></div>
-      <ol><li><span>01</span><strong>Gather</strong><p>Start from an image folder or a CSV file.</p></li><li><span>02</span><strong>Annotate</strong><p>Move image by image with shared terms and caption tokens.</p></li><li><span>03</span><strong>Export</strong><p>Review the XML and export <code>.xmp</code> sidecars.</p></li></ol>
+    <section class="workflow" aria-labelledby="workflow-title"><div><p class="eyebrow">How it works</p><h2 id="workflow-title">Move one photo at a time</h2><p>Keep one shoot in view. Reuse its terms, check every record, then export metadata files for your photo library.</p></div>
+      <ol><li><span>01</span><strong>Gather</strong><p>Start from a photo folder or a CSV file.</p></li><li><span>02</span><strong>Annotate</strong><p>Move photo by photo with shared terms and caption tokens.</p></li><li><span>03</span><strong>Export</strong><p>Review the metadata file and export one <code>.xmp</code> file for each photo.</p></li></ol>
     </section>
-    <section class="boundaries" aria-labelledby="privacy-title"><div><p class="eyebrow">Privacy and limits</p><h2 id="privacy-title">Your files stay under your control</h2></div><div><p>Caption Queue stores the workspace in this browser. It sends nothing during the free metadata workflow.</p><p>It writes XMP sidecars. It does not change image files or generate captions for you.</p><a href="/privacy" data-nav>Read the privacy details</a></div></section>
+    <section class="boundaries" aria-labelledby="privacy-title"><div><p class="eyebrow">Privacy and limits</p><h2 id="privacy-title">Your files stay under your control</h2></div><div><p>Caption Queue stores the workspace in this browser. It sends nothing during the free metadata workflow.</p><p>It writes separate <code>.xmp</code> metadata files. It does not change photo files or generate captions.</p><a href="/privacy" data-nav>Read the privacy details</a></div></section>
     <section class="pricing" aria-labelledby="pricing-title"><div><p class="eyebrow">One-time license</p><h2 id="pricing-title">Use the free queue or remove its limit</h2></div><div><p><strong>$24 once</strong></p><p>Field edition removes the 25-record import limit, adds saved shoots, and enables batch edit patterns. Core XMP and data exports remain free.</p><button class="primary-button" id="landing-license-button">View Field edition</button></div></section>
   </main>`);
 }
@@ -127,23 +133,23 @@ function workspace(): string {
       <div class="shoot-heading"><div><span class="eyebrow">Current shoot</span>${narrow ? `<h2>${e(shoot.name)}</h2>` : `<h1>${e(shoot.name)}</h1>`}${data.shoots.length > 1 ? `<label class="sr-only" for="shoot-select">Choose shoot</label><select id="shoot-select">${data.shoots.map((s) => `<option value="${e(s.id)}" ${s.id === shoot.id ? 'selected' : ''}>${e(s.name)}</option>`).join('')}</select>` : ''}</div><button class="icon-button mobile-close" id="close-queue" aria-label="Close queue">×</button></div>
       <div class="progress-row"><span>${ready} of ${items.length} ready</span><span>${Math.round(ready / items.length * 100)}%</span></div><progress class="progress" aria-label="Shoot completion" max="100" value="${ready / items.length * 100}">${Math.round(ready / items.length * 100)}%</progress>
       <div class="queue-tools"><label><span class="sr-only">Search filenames</span><input id="queue-search" type="search" placeholder="Search filenames" value="${e(query)}"></label><select id="queue-filter" aria-label="Filter queue"><option value="all" ${filter === 'all' ? 'selected' : ''}>All</option><option value="unfinished" ${filter === 'unfinished' ? 'selected' : ''}>Needs work</option><option value="ready" ${filter === 'ready' ? 'selected' : ''}>Ready</option></select></div>
-      <ol class="specimen-list">${visible.map((item) => queueRow(item, items.indexOf(item))).join('') || '<li class="no-results">No photographs match this filter.</li>'}</ol>
+      <ol class="specimen-list">${visible.map((item) => queueRow(item, items.indexOf(item))).join('') || '<li class="no-results">No photos match this filter.</li>'}</ol>
       <div class="queue-bottom"><button class="secondary-button" id="new-shoot">${icon('plus')} New shoot</button><button class="quiet-button" id="batch-button">Batch edit</button></div>
     </aside>
     <section class="editor" aria-label="Metadata editor">
       ${narrow ? `<h1 class="mobile-workspace-title">${e(shoot.name)}</h1>` : ''}<div class="editor-bar"><button class="queue-toggle" id="queue-toggle" aria-expanded="${showQueue}" aria-controls="photo-queue">${icon('queue')} Queue <span>${position + 1}/${items.length}</span></button><div><button class="quiet-button" id="previous-button" ${position === 0 ? 'disabled' : ''}>← Previous</button><button class="quiet-button" id="next-button" ${position === items.length - 1 ? 'disabled' : ''}>Next →</button></div></div>
       <article class="annotation-sheet">
-        <header class="specimen-header"><div class="thumb">${previewFor(current)}</div><div><p class="accession">Specimen ${String(position + 1).padStart(3, '0')} / ${String(items.length).padStart(3, '0')}</p><h2>${e(current.fileName)}</h2><p>${current.size ? formatBytes(current.size) : 'CSV record'} · ${e(current.relativePath)}</p></div><span class="status-badge ${current.ready ? 'is-ready' : ''}">${current.ready ? `${icon('check')} Ready` : 'In progress'}</span></header>
+        <header class="specimen-header"><div class="thumb">${previewFor(current)}</div><div><p class="accession">Photo ${position + 1} of ${items.length}</p><h2>${e(current.fileName)}</h2><p>${current.size ? formatBytes(current.size) : 'CSV record'} · ${e(current.relativePath)}</p></div><span class="status-badge ${current.ready ? 'is-ready' : ''}">${current.ready ? `${icon('check')} Ready` : 'In progress'}</span></header>
         <form id="metadata-form" novalidate>${editorFields(current, shoot)}
-          <section class="validation" aria-labelledby="validation-title" tabindex="-1"><div><span class="eyebrow">Validation ledger</span><h3 id="validation-title">${validationHeading(current)}</h3></div><ul id="validation-list">${validationList(current)}</ul></section>
+          <section class="validation" aria-labelledby="validation-title" tabindex="-1"><div><span class="eyebrow">Required metadata</span><h3 id="validation-title">${validationHeading(current)}</h3></div><ul id="validation-list">${validationList(current)}</ul></section>
           <details class="xmp-preview"><summary>Inspect XMP output <span>Escaped XML</span></summary><pre><code id="xmp-code">${e(makeXmp(current))}</code></pre></details>
           <div class="editor-actions"><button type="button" class="secondary-button" id="export-one">${icon('download')} Export this XMP</button><button type="submit" class="primary-button">${current.ready ? 'Save & next' : `${icon('check')} Mark ready & next`}</button></div>
           <p class="shortcut">Keyboard: <kbd>⌘/Ctrl</kbd> + <kbd>Enter</kbd> saves and advances. <kbd>J</kbd>/<kbd>K</kbd> moves the queue.</p>
         </form>
       </article>
     </section>
-    <aside class="field-notes" aria-label="Shoot tools"><section><span class="eyebrow">Vocabulary</span><h2>Field notes</h2><p>Reuse controlled terms across this shoot.</p><div class="vocab">${shoot.vocabulary.map((word) => `<button data-keyword="${e(word)}">+ ${e(word)}</button>`).join('')}</div><form id="vocab-form"><label for="vocab-input">Add a controlled term</label><div><input id="vocab-input" maxlength="60" required><button class="icon-button" aria-label="Add term">${icon('plus')}</button></div></form></section>
-      <section class="export-panel"><span class="eyebrow">Sidecar press</span><h2>Write the set</h2><p>${ready === items.length ? 'Every record is marked ready.' : `${items.length - ready} record${items.length - ready === 1 ? '' : 's'} still need review.`}</p><button class="primary-button" id="export-all">${icon('download')} Write ${items.length} XMP sidecars</button><button class="quiet-button" id="export-csv">Export metadata CSV</button><button class="quiet-button" id="export-backup">Export workspace backup</button><button class="quiet-button" type="button" data-file-picker="backup-input">Import workspace backup</button><input class="sr-only" id="backup-input" type="file" accept=".json,application/json" tabindex="-1" aria-hidden="true"><small>Writes new <code>.xmp</code> files. Image originals are never changed.</small></section>
+    <aside class="field-notes" aria-label="Shoot tools"><section><span class="eyebrow">Vocabulary</span><h2>Reusable terms</h2><p>Reuse controlled terms across this shoot.</p><div class="vocab">${shoot.vocabulary.map((word) => `<button data-keyword="${e(word)}">+ ${e(word)}</button>`).join('')}</div><form id="vocab-form"><label for="vocab-input">Add a controlled term</label><div><input id="vocab-input" maxlength="60" required><button class="icon-button" aria-label="Add term">${icon('plus')}</button></div></form></section>
+      <section class="export-panel"><span class="eyebrow">XMP exports</span><h2>Export this shoot</h2><p>${ready === items.length ? 'Every record is marked ready.' : `${items.length - ready} record${items.length - ready === 1 ? ' still needs' : 's still need'} review.`}</p><button class="primary-button" id="export-all">${icon('download')} Export ${items.length} <code>.xmp</code> files</button><button class="quiet-button" id="export-csv">Export metadata CSV</button><button class="quiet-button" id="export-backup">Export workspace backup</button><button class="quiet-button" type="button" data-file-picker="backup-input">Import workspace backup</button><input class="sr-only" id="backup-input" type="file" accept=".json,application/json" tabindex="-1" aria-hidden="true"><small>Creates separate <code>.xmp</code> files. Original photo files are never changed.</small></section>
     </aside>
   </main>${batchDialog(shoot, items)}`);
 }
@@ -175,11 +181,11 @@ function field(name: keyof Metadata, label: string, value: string, help = '', ma
 function textarea(name: keyof Metadata, label: string, value: string, help: string, max: number): string {
   return `<div><label for="${name}">${label} <span class="optional">${e(help)}</span></label><textarea id="${name}" name="${name}" maxlength="${max}" rows="5">${e(value)}</textarea><small class="char-count" id="${name}-count">${value.length} / ${max}</small></div>`;
 }
-function validationHeading(item: QueueItem): string { const n = validateMetadata(item.metadata).length; return n ? `${n} ${n === 1 ? 'item' : 'items'} to resolve` : 'Standards ready'; }
+function validationHeading(item: QueueItem): string { const n = validateMetadata(item.metadata).length; return n ? `${n} ${n === 1 ? 'item' : 'items'} to resolve` : 'Required metadata complete'; }
 function validationList(item: QueueItem): string { const list = validateMetadata(item.metadata); return list.length ? list.map((v) => `<li><span>○</span>${e(v)}</li>`).join('') : '<li class="valid"><span>✓</span>Required fields are present and XML-safe</li>'; }
 
 function batchDialog(shoot: Shoot, items: QueueItem[]): string {
-  return `<dialog id="batch-dialog"><form method="dialog" class="dialog-card"><header><div><span class="eyebrow">Batch annotation</span><h2>Apply to ${items.length} records</h2></div><button class="icon-button" value="cancel" aria-label="Close">×</button></header><p>Tokens render separately for each photo. Existing text is replaced; keywords are added.</p><label for="batch-title">Title pattern</label><input id="batch-title" placeholder="${e(shoot.name)} — {sequence}"><label for="batch-caption">Caption pattern</label><textarea id="batch-caption" rows="3" placeholder="Photograph from ${e(shoot.name)}."></textarea><label for="batch-keywords">Add keywords <span class="optional">semicolon separated</span></label><input id="batch-keywords"><label class="check-row"><input id="batch-unfinished" type="checkbox" checked> Only records not marked ready</label><footer><button class="quiet-button" value="cancel">Cancel</button><button class="primary-button" id="apply-batch" value="default">Apply changes</button></footer></form></dialog>`;
+  return `<dialog id="batch-dialog"><form method="dialog" class="dialog-card"><header><div><span class="eyebrow">Batch annotation</span><h2>Apply to ${items.length} records</h2></div><button class="icon-button" value="cancel" aria-label="Close">×</button></header><p>Tokens render separately for each photo. Existing text is replaced; keywords are added.</p><label for="batch-title">Title pattern</label><input id="batch-title" placeholder="${e(shoot.name)} — {sequence}"><label for="batch-caption">Caption pattern</label><textarea id="batch-caption" rows="3" placeholder="Photo from ${e(shoot.name)}."></textarea><label for="batch-keywords">Add keywords <span class="optional">semicolon separated</span></label><input id="batch-keywords"><label class="check-row"><input id="batch-unfinished" type="checkbox" checked> Only records not marked ready</label><footer><button class="quiet-button" value="cancel">Cancel</button><button class="primary-button" id="apply-batch" value="default">Apply changes</button></footer></form></dialog>`;
 }
 
 function licenseDialog(): string {
@@ -188,13 +194,13 @@ function licenseDialog(): string {
 }
 
 function legalPage(kind: 'privacy' | 'terms'): string {
-  const privacy = `<p class="eyebrow">Last updated 29 August 2026</p><h1>Keep your photo metadata private</h1><p class="lede">Your photographs, captions, keywords, and workspace records stay in this browser unless you export them.</p><h2>What stays on your device</h2><p>Queue data is stored in IndexedDB. A license token and its last verification result are stored in localStorage. You can remove either through the app or your browser settings.</p><h2>What leaves your device</h2><p>Caption Queue does not upload photos or metadata. When you verify a paid license, it sends only that token to Sociobot's licensing API. The hosted checkout has its own payment privacy terms. This app contains no analytics, advertising, tracking pixels, or third-party scripts.</p><h2>Your control</h2><p>Export a workspace backup before clearing browser storage. Clearing site data deletes the local workspace and license from this device.</p>`;
-  const terms = `<p class="eyebrow">Last updated 29 August 2026</p><h1>Terms for using Caption Queue</h1><p class="lede">Caption Queue helps prepare XMP metadata. You remain responsible for every record you export.</p><h2>License and purchase</h2><p>The free edition works without an account. Field edition is a $24 one-time license for the purchaser. Sociobot/Dodo is merchant of record and handles checkout and refunds. A refund or charge reversal revokes the license.</p><h2>Your data</h2><p>You own your photographs and metadata. Caption Queue does not claim rights to them. Keep backups and test exported sidecars with your DAM before a production handoff.</p><h2>Warranty</h2><p>The software is provided “as is,” without warranties. To the maximum extent permitted by law, the authors are not liable for lost data, missed delivery, or downstream metadata changes.</p>`;
+  const privacy = `<p class="eyebrow">Last updated 29 August 2026</p><h1>Keep your photo metadata private</h1><p class="lede">Your photos, captions, keywords, and workspace records stay in this browser unless you export them.</p><h2>What stays on your device</h2><p>Queue data is stored in this browser. A license token and its last verification result also stay here. You can remove either through the app or your browser settings.</p><h2>What leaves your device</h2><p>Caption Queue does not upload photos or metadata. When you verify a paid license, it sends only that token to Sociobot's licensing API. The hosted checkout has its own payment privacy terms. This app contains no analytics, advertising, tracking pixels, or third-party scripts.</p><h2>Your control</h2><p>Export a workspace backup before clearing browser storage. Clearing site data deletes the local workspace and license from this device.</p>`;
+  const terms = `<p class="eyebrow">Last updated 29 August 2026</p><h1>Terms for using Caption Queue</h1><p class="lede">Caption Queue helps prepare <code>.xmp</code> metadata files. You remain responsible for every record you export.</p><h2>License and purchase</h2><p>The free edition works without an account. Field edition is a $24 one-time license for the purchaser. Sociobot/Dodo is merchant of record and handles checkout and refunds. A refund or charge reversal revokes the license.</p><h2>Your data</h2><p>You own your photos and metadata. Caption Queue does not claim rights to them. Keep backups and test exported files with your photo library before a production handoff.</p><h2>Warranty</h2><p>The software is provided “as is,” without warranties. To the maximum extent permitted by law, the authors are not liable for lost data, missed delivery, or downstream metadata changes.</p>`;
   return shell(`<main id="main" class="legal"><aside aria-hidden="true">Caption Queue</aside><article>${kind === 'privacy' ? privacy : terms}<p><a class="secondary-button" href="/" data-nav>Back to Caption Queue</a></p></article></main>`);
 }
 
 function notFoundPage(): string {
-  return shell(`<main id="main" class="not-found"><p class="eyebrow">Page not found</p><h1>This page is not in the queue</h1><p>Return to Caption Queue or open the sample workspace.</p><div><a class="primary-button" href="/" data-nav>Return home</a><a class="secondary-button" href="/demo" data-nav>Open sample data</a></div></main>`);
+  return shell(`<main id="main" class="not-found"><p class="eyebrow">Unknown address</p><h1>Page not found</h1><p>Return to Caption Queue or open the sample workspace.</p><div><a class="primary-button" href="/" data-nav>Return home</a><a class="secondary-button" href="/demo" data-nav>Open sample data</a></div></main>`);
 }
 
 function updateRouteMetadata(): void {
@@ -207,10 +213,10 @@ function updateRouteMetadata(): void {
     '/demo': 'Try Caption Queue with three isolated sample records. Your real workspace stays separate.'
   };
   document.title = title;
-  document.querySelector<HTMLMetaElement>('meta[name="description"]')!.content = descriptions[path] ?? 'Write titles, captions, keywords, and XMP sidecars in a private offline photo queue.';
+  document.querySelector<HTMLMetaElement>('meta[name="description"]')!.content = descriptions[path] ?? 'Write titles, captions, and keywords offline, then export a separate .xmp metadata file for each photo.';
   document.querySelector<HTMLLinkElement>('link[rel="canonical"]')!.href = `https://photo-metadata-queue.sociobot.in${path === '/' ? '/' : path}`;
   document.querySelectorAll<HTMLMetaElement>('meta[property="og:title"], meta[name="twitter:title"]').forEach((meta) => { meta.content = title; });
-  document.querySelectorAll<HTMLMetaElement>('meta[property="og:description"], meta[name="twitter:description"]').forEach((meta) => { meta.content = descriptions[path] ?? 'Write photo metadata locally and export clean XMP sidecars.'; });
+  document.querySelectorAll<HTMLMetaElement>('meta[property="og:description"], meta[name="twitter:description"]').forEach((meta) => { meta.content = descriptions[path] ?? 'Write photo metadata locally and export separate .xmp metadata files.'; });
   document.querySelector<HTMLMetaElement>('meta[property="og:url"]')!.content = `https://photo-metadata-queue.sociobot.in${path === '/' ? '/' : path}`;
 }
 
@@ -224,12 +230,26 @@ function render(focusHeading = false): void {
   if (focusHeading) {
     const heading = document.querySelector<HTMLHeadingElement>('h1');
     heading?.setAttribute('tabindex', '-1');
-    heading?.focus();
+    heading?.focus({ preventScroll: true });
     document.querySelector('#live')!.textContent = document.title;
   }
 }
 
-async function navigate(path: string, push = true): Promise<void> {
+function saveCurrentScroll(): void {
+  const state = history.state as RouteState | null;
+  history.replaceState({ ...state, cqEntry: state?.cqEntry ?? crypto.randomUUID(), scrollX: window.scrollX, scrollY: window.scrollY }, '', location.href);
+}
+
+function restoreRouteScroll(state: RouteState | null, focusHeading: boolean): void {
+  restoringScroll = true;
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    if (focusHeading) document.querySelector<HTMLHeadingElement>('h1')?.focus({ preventScroll: true });
+    window.scrollTo(state?.scrollX ?? 0, state?.scrollY ?? 0);
+    restoringScroll = false;
+  }));
+}
+
+async function navigate(path: string, push = true, targetState: RouteState | null = null): Promise<void> {
   const nextDemo = path === '/demo';
   if (demoMode && !nextDemo) await clearData('demo');
   if (nextDemo !== demoMode) {
@@ -245,9 +265,13 @@ async function navigate(path: string, push = true): Promise<void> {
       paid = hasLicense();
     }
   }
-  if (push) history.pushState({}, '', path);
+  if (push) {
+    saveCurrentScroll();
+    targetState = { cqEntry: crypto.randomUUID(), scrollX: 0, scrollY: 0 };
+    history.pushState(targetState, '', path);
+  }
   render(true);
-  window.scrollTo(0, 0);
+  restoreRouteScroll(targetState, true);
 }
 
 function bindCommon(): void {
@@ -379,8 +403,8 @@ function showUndo(message: string): void { const toast = document.createElement(
 
 async function writeAllSidecars(): Promise<void> {
   const items = shootItems();
-  if (window.showDirectoryPicker) try { const directory = await window.showDirectoryPicker(); for (const item of items) { const file = await directory.getFileHandle(sidecarName(item.fileName), { create: true }); const writer = await file.createWritable(); await writer.write(makeXmp(item)); await writer.close(); } announce(`${items.length} XMP sidecars written to the selected folder.`); return; } catch (error) { if (error instanceof DOMException && error.name === 'AbortError') return; }
-  items.forEach((item, index) => setTimeout(() => downloadXmp(item), index * 120)); announce(`${items.length} sidecar downloads started. Your browser may ask permission for multiple files.`);
+  if (window.showDirectoryPicker) try { const directory = await window.showDirectoryPicker(); for (const item of items) { const file = await directory.getFileHandle(sidecarName(item.fileName), { create: true }); const writer = await file.createWritable(); await writer.write(makeXmp(item)); await writer.close(); } announce(`${items.length} .xmp files were written to the selected folder.`); return; } catch (error) { if (error instanceof DOMException && error.name === 'AbortError') return; }
+  items.forEach((item, index) => setTimeout(() => downloadXmp(item), index * 120)); announce(`${items.length} .xmp downloads started. Your browser may ask permission for multiple files.`);
 }
 function downloadXmp(item: QueueItem): void { downloadBlob(makeXmp(item), sidecarName(item.fileName), 'application/rdf+xml'); announce(`${sidecarName(item.fileName)} exported.`); }
 function exportBackup(): void { downloadBlob(JSON.stringify({ version: 1, exportedAt: new Date().toISOString(), ...data }, null, 2), `caption-queue-${activeShoot()?.name.replace(/[^a-z0-9]+/gi, '-').toLowerCase() || 'backup'}.json`, 'application/json'); }
@@ -389,7 +413,11 @@ function newShoot(): void { if (!paid && data.shoots.length >= 1) { openLicense(
 function openLicense(): void { (document.querySelector('#license-dialog') as HTMLDialogElement)?.showModal(); }
 function formatBytes(bytes: number): string { return bytes > 1_048_576 ? `${(bytes / 1_048_576).toFixed(1)} MB` : `${Math.ceil(bytes / 1024)} KB`; }
 
-window.addEventListener('popstate', () => { void navigate(location.pathname, false); });
+window.addEventListener('scroll', () => {
+  if (restoringScroll || scrollFrame) return;
+  scrollFrame = requestAnimationFrame(() => { scrollFrame = 0; if (!restoringScroll) saveCurrentScroll(); });
+}, { passive: true });
+window.addEventListener('popstate', (event) => { void navigate(location.pathname, false, event.state as RouteState | null); });
 window.addEventListener('online', () => render()); window.addEventListener('offline', () => render());
 window.addEventListener('keydown', (event) => {
   if ((event.metaKey || event.ctrlKey) && event.key === 'Enter' && data.items.length) { event.preventDefault(); markReadyAndMove(); return; }

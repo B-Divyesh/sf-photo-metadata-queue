@@ -22,10 +22,17 @@
   },
   {
     "id": "xmp-export",
-    "claim": "Caption Queue exports well-formed XMP with XML-sensitive text escaped.",
+    "claim": "Caption Queue exports valid .xmp metadata files with XML-sensitive text escaped.",
     "where": "landing workflow, editor, README",
     "test": "npm run test:e2e -- --grep @claim:xmp-export",
     "sandbox": "fresh Chromium context at /demo; add ampersand and angle brackets; export the sample sidecar; parse it as XML and inspect escaped source"
+  },
+  {
+    "id": "original-files-unchanged",
+    "claim": "Importing and exporting metadata never changes the original photo files.",
+    "where": "landing headline and privacy section, editor export panel, README",
+    "test": "npm run test:e2e -- --grep @claim:original-files-unchanged",
+    "sandbox": "fresh Chromium context and fixture directory; hash source photos before and after import, single export, direct-folder export, and bulk download; assert every created filename ends in .xmp"
   },
   {
     "id": "photo-import",
@@ -33,6 +40,13 @@
     "where": "landing photo-folder action, README",
     "test": "npm run test:e2e -- --grep @claim:photo-import",
     "sandbox": "fresh Chromium context entered through /demo; start for real; select two JPEG fixtures with undecodable preview bytes; assert both queue records"
+  },
+  {
+    "id": "no-generated-captions",
+    "claim": "Caption Queue does not generate captions.",
+    "where": "landing privacy section",
+    "test": "npm run test:e2e -- --grep @claim:no-generated-captions",
+    "sandbox": "fresh Chromium context entered through /demo; start for real; import empty photo records; wait and move through the queue; assert captions remain empty and no model endpoint is requested"
   },
   {
     "id": "metadata-tools",
@@ -43,8 +57,8 @@
   },
   {
     "id": "bulk-xmp",
-    "claim": "Write the set exports one XMP sidecar for every queue record when direct folder writing is unavailable.",
-    "where": "editor sidecar panel, README",
+    "claim": "Export this shoot downloads one .xmp file for every queue record when direct folder writing is unavailable.",
+    "where": "editor XMP exports panel, README",
     "test": "npm run test:e2e -- --grep @claim:bulk-xmp",
     "sandbox": "fresh Chromium context at /demo without File System Access; write the sample set; assert three separate named XMP downloads"
   },
@@ -92,8 +106,8 @@
   },
   {
     "id": "direct-sidecar-write",
-    "claim": "When the File System Access API is available, Write the set writes one XMP sidecar for every queue record.",
-    "where": "README, editor sidecar panel",
+    "claim": "In supported browsers, Export this shoot writes one .xmp file for every queue record to the chosen folder.",
+    "where": "README, editor XMP exports panel",
     "test": "npm run test:e2e -- --grep @claim:direct-sidecar-write",
     "sandbox": "fresh Chromium context at /demo; provide a compatible recorded directory handle; write the sample set; assert all three XMP filenames and content"
   },

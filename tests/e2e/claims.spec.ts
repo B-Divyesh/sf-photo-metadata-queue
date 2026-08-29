@@ -1,5 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
-import { readFile } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
+import { readdir, readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
 const demoDb = 'demo:caption-queue';
@@ -35,6 +36,11 @@ async function downloadText(page: Page, action: () => Promise<void>): Promise<{ 
   const path = await download.path();
   if (!path) throw new Error('Download did not produce a local file.');
   return { name: download.suggestedFilename(), text: await readFile(path, 'utf8') };
+}
+
+async function fixtureSnapshot(directory: string): Promise<Record<string, string>> {
+  const names = (await readdir(directory)).sort();
+  return Object.fromEntries(await Promise.all(names.map(async (name) => [name, createHash('sha256').update(await readFile(resolve(directory, name))).digest('hex')])));
 }
 
 test('@claim:demo-sandbox sample mode is one click, isolated, resettable, and discardable', async ({ page }) => {
@@ -127,6 +133,42 @@ test('@claim:xmp-export exported sample XMP is well formed and escapes XML-sensi
   expect(await page.evaluate((xml) => new DOMParser().parseFromString(xml, 'application/xml').querySelector('parsererror')?.textContent ?? '', output.text)).toBe('');
 });
 
+test('@claim:original-files-unchanged import and every metadata export leave original photo bytes and names unchanged', async ({ page }) => {
+  const fixtureDirectory = resolve('tests/fixtures/photo-shoot');
+  const before = await fixtureSnapshot(fixtureDirectory);
+  await openFreshDemo(page);
+  await page.getByRole('button', { name: 'Start for real' }).click();
+  await page.locator('#photo-input').setInputFiles(fixtureDirectory);
+  await expect(page.locator('.specimen-row')).toHaveCount(2);
+
+  const single = await downloadText(page, () => page.getByRole('button', { name: 'Export this XMP' }).click());
+  expect(single.name).toBe('RAW_PROXY_001.xmp');
+
+  await page.evaluate(() => {
+    const writes: Record<string, string> = {};
+    (window as typeof window & { sidecarWrites: Record<string, string> }).sidecarWrites = writes;
+    window.showDirectoryPicker = async () => ({
+      getFileHandle: async (name: string, options: { create: boolean }) => {
+        if (!options.create || !name.endsWith('.xmp')) throw new Error(`Unexpected write target: ${name}`);
+        return { createWritable: async () => ({ write: async (content: string) => { writes[name] = content; }, close: async () => undefined }) };
+      }
+    }) as unknown as FileSystemDirectoryHandle;
+  });
+  await page.getByRole('button', { name: 'Export 2 .xmp files' }).click();
+  await expect.poll(() => page.evaluate(() => Object.keys((window as typeof window & { sidecarWrites: Record<string, string> }).sidecarWrites).sort()))
+    .toEqual(['RAW_PROXY_001.xmp', 'RAW_PROXY_002.xmp']);
+
+  await page.evaluate(() => { delete window.showDirectoryPicker; });
+  const bulkNames: string[] = [];
+  page.on('download', (download) => bulkNames.push(download.suggestedFilename()));
+  await page.getByRole('button', { name: 'Export 2 .xmp files' }).click();
+  await expect.poll(() => bulkNames.slice().sort()).toEqual(['RAW_PROXY_001.xmp', 'RAW_PROXY_002.xmp']);
+
+  expect(await fixtureSnapshot(fixtureDirectory)).toEqual(before);
+  expect(Object.keys(before)).toEqual(['RAW_PROXY_001.JPG', 'RAW_PROXY_002.JPG']);
+  expect([single.name, ...bulkNames].every((name) => name.endsWith('.xmp'))).toBe(true);
+});
+
 test('@claim:photo-import selected photos become queue records when previews cannot be decoded', async ({ page }) => {
   await openFreshDemo(page);
   await page.getByRole('button', { name: 'Start for real' }).click();
@@ -134,6 +176,19 @@ test('@claim:photo-import selected photos become queue records when previews can
   await expect(page.locator('.specimen-row')).toHaveCount(2);
   await expect(page.getByText('RAW_PROXY_001.JPG', { exact: true }).first()).toBeVisible();
   await expect(page.getByText('RAW_PROXY_002.JPG', { exact: true }).first()).toBeVisible();
+});
+
+test('@claim:no-generated-captions imported empty records stay empty and make no model request', async ({ page }) => {
+  const requests: string[] = [];
+  page.on('request', (request) => requests.push(request.url()));
+  await openFreshDemo(page);
+  await page.getByRole('button', { name: 'Start for real' }).click();
+  await page.locator('#photo-input').setInputFiles(resolve('tests/fixtures/photo-shoot'));
+  await expect(page.locator('#description')).toHaveValue('');
+  await page.getByRole('button', { name: 'Next →' }).click();
+  await expect(page.locator('#description')).toHaveValue('');
+  await page.waitForTimeout(500);
+  expect(requests.some((url) => /openai|responses|model/i.test(url))).toBe(false);
 });
 
 test('@claim:metadata-tools tokens, terms, and validation update demo metadata', async ({ page }) => {
@@ -151,12 +206,12 @@ test('@claim:metadata-tools tokens, terms, and validation update demo metadata',
   await expect(page.locator('.status-badge')).toContainText('Ready');
 });
 
-test('@claim:bulk-xmp write the set downloads one sidecar per sample record', async ({ page }) => {
+test('@claim:bulk-xmp export this shoot downloads one .xmp file per sample record', async ({ page }) => {
   await openFreshDemo(page);
   await page.evaluate(() => { delete window.showDirectoryPicker; });
   const downloads: string[] = [];
   page.on('download', (download) => downloads.push(download.suggestedFilename()));
-  await page.getByRole('button', { name: 'Write 3 XMP sidecars' }).click();
+  await page.getByRole('button', { name: 'Export 3 .xmp files' }).click();
   await expect.poll(() => downloads.slice().sort()).toEqual(['BIRDS_1842.xmp', 'BIRDS_1843.xmp', 'BIRDS_1844.xmp']);
 });
 
@@ -256,7 +311,7 @@ test('@claim:backup-cross-browser a JSON backup restores into a separate fresh b
   }
 });
 
-test('@claim:direct-sidecar-write compatible directory handles receive one XMP sidecar for every queue record', async ({ page }) => {
+test('@claim:direct-sidecar-write compatible directory handles receive one .xmp file for every queue record', async ({ page }) => {
   await openFreshDemo(page);
   await page.evaluate(() => {
     const writes: Record<string, string> = {};
@@ -270,7 +325,7 @@ test('@claim:direct-sidecar-write compatible directory handles receive one XMP s
       })
     }) as unknown as FileSystemDirectoryHandle;
   });
-  await page.getByRole('button', { name: 'Write 3 XMP sidecars' }).click();
+  await page.getByRole('button', { name: 'Export 3 .xmp files' }).click();
   await expect.poll(() => page.evaluate(() => Object.keys((window as typeof window & { sidecarWrites: Record<string, string> }).sidecarWrites).sort()))
     .toEqual(['BIRDS_1842.xmp', 'BIRDS_1843.xmp', 'BIRDS_1844.xmp']);
   const writes = await page.evaluate(() => (window as typeof window & { sidecarWrites: Record<string, string> }).sidecarWrites);

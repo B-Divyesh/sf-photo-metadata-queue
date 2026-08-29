@@ -64,6 +64,11 @@ for (const route of ['/demo', '/privacy', '/terms']) {
 
 const missingResponse = await fetch(new URL('/this-page-does-not-exist', base), { redirect: 'manual' });
 assert.equal(missingResponse.status, 404, 'unknown routes must return HTTP 404');
-assert.deepEqual(Buffer.from(await missingResponse.arrayBuffer()), await readFile(join(dist, '404.html')), 'unknown routes must use the designed 404 page');
+const missingBytes = Buffer.from(await missingResponse.arrayBuffer());
+assert.deepEqual(missingBytes, await readFile(join(dist, '404.html')), 'unknown routes must use the designed 404 page');
+const missingHtml = missingBytes.toString('utf8');
+for (const expected of ['<h1>Page not found</h1>', 'name="description"', 'rel="canonical"', 'property="og:title"', 'href="/privacy"', 'href="/terms"', '<footer>']) {
+  assert.ok(missingHtml.includes(expected), `404 shell is missing ${expected}`);
+}
 
 console.log(`Live release verified: ${localFiles.length} artifacts match, response policies, SPA routes, and the 404 response pass at ${base.origin}`);

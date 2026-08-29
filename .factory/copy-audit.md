@@ -1,36 +1,63 @@
-# Landing-page copy audit
+# Copy audit
 
-Audited 2026-08-29. Counts treat numbers, abbreviations, and hyphenated terms as one word. No sentence exceeds 22 words and none uses a banned marketing term.
+Audited 2026-08-29 after adversarial review 1. Counts treat numbers, abbreviations, paths, and hyphenated terms as one word. Every landing-page line is at most 22 words. No line uses a banned marketing word.
 
-| Landing copy | Words | Result |
+## Landing page
+
+| Visible copy | Words | Result |
 | --- | ---: | --- |
-| Caption large shoots without changing originals | 6 | Pass |
-| For photographers with large shoots, it turns folders or CSV files into a focused queue for clean XMP sidecars. | 19 | Pass |
+| Local photo metadata queue | 4 | Pass |
+| Caption large shoots without changing originals | 6 | Pass; `original-files-unchanged` claim |
+| For photographers with large shoots, it turns folders or CSV files into a queue and writes separate XMP metadata files. | 20 | Pass |
+| Try it with sample data | 5 | Pass; `demo-sandbox` claim |
 | Opens three edited sample records. | 5 | Pass |
-| Runs offline after the first visit. | 6 | Pass |
-| Photos and metadata stay on this device. | 7 | Pass |
-| Free for 25 records per shoot. | 6 | Pass |
-| Field edition costs $24 once. | 5 | Pass |
+| Choose photo folder | 3 | Pass |
+| Import CSV | 2 | Pass |
+| Restore backup | 2 | Pass |
+| Runs offline after the first visit. | 6 | Pass; `offline-reload` claim |
+| Photos and metadata stay on this device. | 7 | Pass; `local-privacy` claim |
+| Free for 25 records per shoot. | 6 | Pass; `free-limit` claim |
+| Field edition costs $24 once. | 5 | Pass; `field-edition` claim |
+| How it works | 3 | Pass |
+| Move one photo at a time | 6 | Pass |
 | Keep one shoot in view. | 5 | Pass |
-| Reuse its terms, check every record, then send clean sidecars to your DAM. | 13 | Pass |
-| Start from an image folder or a CSV file. | 9 | Pass |
-| Move image by image with shared terms and caption tokens. | 10 | Pass |
-| Review the XML and export XMP sidecars. | 7 | Pass |
-| Caption Queue stores the workspace in this browser. | 8 | Pass |
-| It sends nothing during the free metadata workflow. | 8 | Pass |
-| It writes XMP sidecars. | 4 | Pass |
-| It does not change image files or generate captions for you. | 11 | Pass |
-| Field edition removes the 25-record import limit, adds saved shoots, and enables batch edit patterns. | 15 | Pass |
+| Reuse its terms, check every record, then export metadata files for your photo library. | 14 | Pass |
+| Gather | 1 | Pass |
+| Start from a photo folder or a CSV file. | 9 | Pass |
+| Annotate | 1 | Pass |
+| Move photo by photo with shared terms and caption tokens. | 10 | Pass |
+| Export | 1 | Pass |
+| Review the metadata file and export one `.xmp` file for each photo. | 12 | Pass |
+| Privacy and limits | 3 | Pass |
+| Your files stay under your control | 6 | Pass |
+| Caption Queue stores the workspace in this browser. | 8 | Pass; `local-persistence` claim |
+| It sends nothing during the free metadata workflow. | 8 | Pass; `local-privacy` claim |
+| It writes separate `.xmp` metadata files. | 6 | Pass; `xmp-export` claim |
+| It does not change photo files or generate captions. | 9 | Pass; `original-files-unchanged` and `no-generated-captions` claims |
+| Read the privacy details | 4 | Pass |
+| One-time license | 2 | Pass |
+| Use the free queue or remove its limit | 8 | Pass |
+| $24 once | 2 | Pass; `field-edition` claim |
+| Field edition removes the 25-record import limit, adds saved shoots, and enables batch edit patterns. | 15 | Pass; `field-edition` claim |
 | Core XMP and data exports remain free. | 7 | Pass |
-| Photo metadata stays on this device during the free workflow. | 10 | Pass |
+| View Field edition | 3 | Pass |
+| Photo metadata stays on this device during the free workflow. | 10 | Pass; `local-privacy` claim |
+| Caption Queue v1.0.0 · Built by Param Factory · Field-desk image generated for this product. | 15 | Pass |
+
+## README review findings
+
+The introduction now defines `.xmp` metadata files before using the shorter `.xmp` file term. The audience text names a photo library or archive instead of “DAM.” User-facing capabilities say “browser database” and “this browser” instead of exposing IndexedDB. Folder writing is described by its result, and the privacy sentence says the workflow contacts only this site's servers. The deployment routing and 404 behavior are now two sentences; neither exceeds 22 words.
 
 ## Terminology
 
-| Concept | Term used |
+| Concept | One term |
 | --- | --- |
-| A group of photographs | shoot |
-| One photograph waiting for metadata | record |
-| Ordered work list | queue |
-| Metadata companion file | XMP sidecar |
+| Source media | photo |
+| One queued unit | record |
+| Group of records | shoot |
+| Ordered work | queue |
+| Exported companion file | define once as `.xmp` metadata file, then `.xmp` file |
 | Isolated sample experience | demo |
-| Paid one-time license | Field edition |
+| Paid tier | Field edition |
+
+The botanical field-guide identity remains in color, type, paper texture, fern marks, and layout. Task labels use photographers' plain terms.

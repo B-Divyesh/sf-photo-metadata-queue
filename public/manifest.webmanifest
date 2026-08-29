@@ -1,7 +1,7 @@
 {
   "name": "Caption Queue",
   "short_name": "Caption Queue",
-  "description": "Write photo metadata locally and export clean XMP sidecars.",
+  "description": "Write photo metadata locally and export separate .xmp metadata files.",
   "start_url": "/?source=pwa&v=2",
   "scope": "/",
   "display": "standalone",

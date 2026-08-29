@@ -261,6 +261,65 @@ test('primary routes reflow without horizontal scrolling at 200 percent text siz
   }
 });
 
+test('mobile Back and Forward restore route scroll and focus', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
+  await page.locator('.nav-privacy').evaluate((link: HTMLAnchorElement) => link.click());
+  await expect(page).toHaveURL(/\/privacy$/);
+  await expect(page.getByRole('heading', { name: 'Keep your photo metadata private' })).toBeFocused();
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
+  await page.evaluate(() => window.scrollTo(0, 280));
+  await expect.poll(() => page.evaluate(() => ({ y: window.scrollY, saved: history.state?.scrollY }))).toEqual({ y: 280, saved: 280 });
+
+  await page.goBack();
+  await expect(page).toHaveURL(/\/$/);
+  await expect(page.getByRole('heading', { name: 'Caption large shoots without changing originals' })).toBeFocused();
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
+
+  await page.goForward();
+  await expect(page).toHaveURL(/\/privacy$/);
+  await expect(page.getByRole('heading', { name: 'Keep your photo metadata private' })).toBeFocused();
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(280);
+});
+
+test('demo uses clear singular and plural review status wording', async ({ page }) => {
+  await page.goto('/demo');
+  await expect(page.getByText('1 record still needs review.')).toBeVisible();
+  await page.locator('#title').fill('Edited ready record');
+  await page.getByRole('button', { name: 'Next →' }).click();
+  await expect(page.getByText('2 records still need review.')).toBeVisible();
+});
+
+test('designed 404 has route metadata, the shared navigation shell, and no serious axe violations', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/404.html');
+  await expect(page).toHaveTitle('Page not found — Caption Queue');
+  await expect(page.getByRole('heading', { name: 'Page not found', level: 1 })).toBeVisible();
+  await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', /requested Caption Queue page/);
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://photo-metadata-queue.sociobot.in/404.html');
+  await expect(page.locator('meta[property="og:title"]')).toHaveAttribute('content', 'Page not found — Caption Queue');
+  await expect(page.getByRole('link', { name: 'Privacy', exact: true }).first()).toHaveAttribute('href', '/privacy');
+  await expect(page.getByRole('link', { name: 'Terms', exact: true })).toHaveAttribute('href', '/terms');
+  await expect(page.locator('footer')).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  const undersized = await page.locator('a[href], button').evaluateAll((elements) => elements
+    .filter((element) => {
+      const box = element.getBoundingClientRect();
+      const style = getComputedStyle(element);
+      return style.display !== 'none' && style.visibility !== 'hidden' && box.width > 0 && box.height > 0;
+    })
+    .filter((element) => {
+      const box = element.getBoundingClientRect();
+      return box.width < 44 || box.height < 44;
+    })
+    .map((element) => element.textContent?.trim()));
+  expect(undersized).toEqual([]);
+  const results = await new AxeBuilder({ page }).analyze();
+  expect(results.violations.filter((violation) => ['serious', 'critical'].includes(violation.impact ?? ''))).toEqual([]);
+});
+
 test('unfinished metadata moves focus to its validation summary', async ({ page }) => {
   await page.goto('/demo');
   await page.getByRole('button', { name: /BIRDS_1844.JPG/ }).click();

@@ -10,6 +10,7 @@ type StaticConfig = {
 };
 
 const config = JSON.parse(readFileSync(resolve(process.cwd(), 'public/staticwebapp.config.json'), 'utf8')) as StaticConfig;
+const notFound = readFileSync(resolve(process.cwd(), 'public/404.html'), 'utf8');
 
 describe('static deployment response policy', () => {
   it('uses a restrictive privacy policy and anti-framing headers', () => {
@@ -33,5 +34,12 @@ describe('static deployment response policy', () => {
       expect(config.routes.find((entry) => entry.route === route)?.rewrite).toBe('/index.html');
     }
     expect(config.responseOverrides['404']?.rewrite).toBe('/404.html');
+    expect(notFound).toContain('<h1>Page not found</h1>');
+    expect(notFound).toContain('name="description"');
+    expect(notFound).toContain('rel="canonical"');
+    expect(notFound).toContain('property="og:title"');
+    expect(notFound).toContain('href="/privacy"');
+    expect(notFound).toContain('href="/terms"');
+    expect(notFound).toContain('<footer>');
   });
 });
