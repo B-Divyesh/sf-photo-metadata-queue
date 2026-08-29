@@ -37,6 +37,72 @@ test('imports a CSV, edits a record, and exports valid XMP', async ({ page }) =>
   expect(download.suggestedFilename()).toBe('IMG_0002.xmp');
 });
 
+test('a first license verification accepts only a valid verdict', async ({ page }) => {
+  const cases = [
+    {
+      name: 'invalid verdict',
+      fulfill: { status: 200, contentType: 'application/json', body: JSON.stringify({ valid: false, reason: 'invalid' }) },
+      message: 'That license is not active. Check the token and try again.'
+    },
+    {
+      name: 'network failure',
+      abort: 'failed' as const,
+      message: 'Could not verify this license right now. Check your connection and try again.'
+    },
+    {
+      name: 'rate limit',
+      fulfill: { status: 429, headers: { 'Retry-After': '4', 'Access-Control-Expose-Headers': 'Retry-After' } },
+      message: 'The license service asked us to wait 4 seconds before retrying.'
+    }
+  ];
+
+  for (const scenario of cases) {
+    let verificationRequests = 0;
+    await page.route('https://api.sociobot.in/**', async (route) => {
+      verificationRequests += 1;
+      if ('abort' in scenario) await route.abort(scenario.abort);
+      else await route.fulfill(scenario.fulfill);
+    });
+    await page.getByRole('button', { name: 'View pricing' }).click();
+    await page.getByLabel('Have a license? Paste it here').fill(`fixture-${scenario.name}`);
+    await page.getByRole('button', { name: 'Verify license' }).click();
+    await expect(page.locator('#license-message')).toHaveText(scenario.message);
+    await expect(page.locator('#license-button')).toHaveText('View pricing');
+    await expect(page.getByText('Field edition is active')).toHaveCount(0);
+    expect(verificationRequests).toBe(1);
+
+    if (scenario.name === 'rate limit') {
+      await page.getByRole('button', { name: 'Verify license' }).click();
+      await expect(page.locator('#license-message')).toHaveText(scenario.message);
+      expect(verificationRequests).toBe(1);
+    }
+
+    await page.unroute('https://api.sociobot.in/**');
+    await page.evaluate(() => localStorage.clear());
+    await page.reload();
+  }
+});
+
+test('only a fresh cached valid verdict stays unlocked during a verification outage', async ({ page }) => {
+  let verificationRequests = 0;
+  await page.route('https://api.sociobot.in/**', async (route) => {
+    verificationRequests += 1;
+    await route.abort('failed');
+  });
+  await page.evaluate(() => {
+    localStorage.setItem('sb_license:photo-metadata-queue', 'previously-verified-token');
+    localStorage.setItem('sb_license:photo-metadata-queue:verdict', JSON.stringify({ valid: true, checkedAt: Date.now() }));
+  });
+  await page.reload();
+  await expect(page.locator('#license-button')).toHaveText('Field edition');
+  expect(verificationRequests).toBe(0);
+
+  await page.evaluate(() => localStorage.setItem('sb_license:photo-metadata-queue:verdict', JSON.stringify({ valid: true, checkedAt: Date.now() - 86_400_001 })));
+  await page.reload();
+  await expect(page.locator('#license-button')).toHaveText('View pricing');
+  expect(verificationRequests).toBe(1);
+});
+
 test('landing and editor have no serious axe violations', async ({ page }) => {
   const consoleErrors: string[] = [];
   page.on('console', (message) => { if (message.type() === 'error') consoleErrors.push(message.text()); });

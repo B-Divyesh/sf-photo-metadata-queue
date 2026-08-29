@@ -4,7 +4,7 @@ import { createDemoData } from './demo';
 import { csvToItems, escapeCsv } from './csv';
 import { emptyMetadata, type AppData, type Metadata, type QueueItem, type Shoot } from './types';
 import { makeXmp, renderTokens, sidecarName, validateMetadata } from './xmp';
-import { captureLicense, checkoutUrl, hasLicense, removeLicense, saveLicense, verifyLicense } from './license';
+import { captureLicense, checkoutUrl, hasLicense, hasStoredLicense, removeLicense, saveLicense, verifyLicense, type LicenseCheck } from './license';
 
 declare global {
   interface Window { showDirectoryPicker?: () => Promise<FileSystemDirectoryHandle> }
@@ -32,7 +32,11 @@ const imageUrls = new Map<string, string>();
 if (!demoMode) {
   captureLicense();
   paid = hasLicense();
-  if (paid) verifyLicense().then((valid) => { if (!valid) licenseNotice = 'Your license is no longer active.'; paid = valid; render(); });
+  if (hasStoredLicense()) verifyLicense().then((result) => {
+    if (!result.valid && hasLicense()) licenseNotice = 'Your license is no longer active.';
+    paid = result.valid;
+    render();
+  });
 }
 
 const e = (value: unknown) => String(value ?? '').replace(/[&<>'"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[char]!);
@@ -255,9 +259,15 @@ function bindCommon(): void {
   document.querySelector('#renew-license')?.addEventListener('click', () => (document.querySelector('#license-dialog') as HTMLDialogElement).showModal());
   document.querySelector('.dialog-close')?.addEventListener('click', () => (document.querySelector('#license-dialog') as HTMLDialogElement).close());
   document.querySelector('#remove-license')?.addEventListener('click', () => { removeLicense(); paid = false; render(); });
-  document.querySelector('#restore-form')?.addEventListener('submit', async (event) => { event.preventDefault(); const token = (document.querySelector('#license-token') as HTMLInputElement).value; const message = document.querySelector('#license-message')!; saveLicense(token); message.textContent = 'Checking license…'; paid = await verifyLicense(true); if (paid) render(); else message.textContent = 'That license is not active. Check the token and try again.'; });
+  document.querySelector('#restore-form')?.addEventListener('submit', async (event) => { event.preventDefault(); const token = (document.querySelector('#license-token') as HTMLInputElement).value; const message = document.querySelector('#license-message')!; saveLicense(token); message.textContent = 'Checking license…'; const result = await verifyLicense(true); paid = result.valid; if (paid) render(); else message.textContent = licenseMessage(result); });
   document.querySelector('#reset-demo')?.addEventListener('click', async () => { await clearData('demo'); data = createDemoData(); await saveData(data, 'demo'); render(true); announce('The sample records were reset.'); });
   document.querySelectorAll<HTMLElement>('[data-start-real]').forEach((button) => button.addEventListener('click', () => { (document.querySelector('#license-dialog') as HTMLDialogElement)?.close(); void navigate('/'); }));
+}
+
+function licenseMessage(result: LicenseCheck): string {
+  if (result.status === 'network') return 'Could not verify this license right now. Check your connection and try again.';
+  if (result.status === 'rate-limited') return `The license service asked us to wait ${result.retryAfterSeconds ?? 60} seconds before retrying.`;
+  return 'That license is not active. Check the token and try again.';
 }
 
 function bindImports(): void {

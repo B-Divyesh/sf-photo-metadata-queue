@@ -11,7 +11,7 @@
     "claim": "The demo and saved queue reopen offline after the first visit.",
     "where": "landing facts, manifest, README",
     "test": "npm run test:e2e -- --grep @claim:offline-reload",
-    "sandbox": "fresh Chromium context at /demo; wait for service-worker control; edit a sample; set the context offline; reload and assert the saved queue"
+    "sandbox": "fresh Chromium context at /demo; wait for service-worker control; edit and offline-reload the demo; start a real workspace, import and edit a queue, then offline-reload it"
   },
   {
     "id": "local-privacy",
@@ -60,7 +60,7 @@
     "claim": "Field edition costs $24 once, removes the 25-record import limit, adds saved shoots, and enables batch edit patterns.",
     "where": "landing facts, pricing, license dialog, terms, README",
     "test": "npm run test:e2e -- --grep @claim:field-edition",
-    "sandbox": "fresh Chromium context entered through /demo; assert price; start for real; use a recorded valid verification response; import a 26-row CSV; open batch edit; add a second saved shoot"
+    "sandbox": "fresh Chromium context entered through /demo; assert price; start for real; use a recorded valid verification response; import a 26-row CSV; apply a title pattern and assert its rendered value; add a second saved shoot"
   },
   {
     "id": "local-persistence",
@@ -82,6 +82,34 @@
     "where": "editor, privacy page, README",
     "test": "npm run test:e2e -- --grep @claim:backup-restore",
     "sandbox": "fresh Chromium context at /demo; export the sample JSON; change a record; import the backup and assert restoration"
+  },
+  {
+    "id": "backup-cross-browser",
+    "claim": "A JSON workspace backup restores the queue in a separate browser workspace.",
+    "where": "README",
+    "test": "npm run test:e2e -- --grep @claim:backup-cross-browser",
+    "sandbox": "fresh Chromium context at /demo; change and export the sample JSON; import it into a separate new browser context and assert the restored records"
+  },
+  {
+    "id": "direct-sidecar-write",
+    "claim": "When the File System Access API is available, Write the set writes one XMP sidecar for every queue record.",
+    "where": "README, editor sidecar panel",
+    "test": "npm run test:e2e -- --grep @claim:direct-sidecar-write",
+    "sandbox": "fresh Chromium context at /demo; provide a compatible recorded directory handle; write the sample set; assert all three XMP filenames and content"
+  },
+  {
+    "id": "keyboard-save-next",
+    "claim": "Previous/Next controls and Cmd/Ctrl+Enter move and save queue records.",
+    "where": "README, editor shortcut help",
+    "test": "npm run test:e2e -- --grep @claim:keyboard-save-next",
+    "sandbox": "fresh Chromium context at /demo; use J, Previous, and Next; complete the unfinished sample; press Ctrl+Enter; assert it is saved and ready"
+  },
+  {
+    "id": "license-verification-privacy",
+    "claim": "Paid-license verification sends only the pasted token to the Sociobot licensing endpoint.",
+    "where": "README, privacy page",
+    "test": "npm run test:e2e -- --grep @claim:license-verification-privacy",
+    "sandbox": "fresh Chromium context at /; record the mocked verification request for a pasted fixture token; assert GET, exact endpoint, only the license query key, and no request body"
   },
   {
     "id": "keyboard-controls",

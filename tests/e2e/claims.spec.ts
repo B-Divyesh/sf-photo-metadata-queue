@@ -76,7 +76,7 @@ test('@claim:demo-sandbox sample mode is one click, isolated, resettable, and di
   await expect(page.locator('.specimen-row')).toHaveCount(3);
 });
 
-test('@claim:offline-reload demo edits survive an offline reload after the first visit', async ({ page, context }) => {
+test('@claim:offline-reload demo and saved real queues reopen offline after the first visit', async ({ page, context }) => {
   await openFreshDemo(page);
   await page.waitForFunction(() => navigator.serviceWorker?.controller !== null);
   await page.locator('#title').fill('Offline marsh record');
@@ -94,6 +94,16 @@ test('@claim:offline-reload demo edits survive an offline reload after the first
   await page.reload();
   await expect(page.getByRole('heading', { name: 'Salt marsh bird survey', level: 1 })).toBeVisible();
   await expect(page.locator('#title')).toHaveValue('Offline marsh record');
+
+  await context.setOffline(false);
+  await page.getByRole('button', { name: 'Start for real' }).click();
+  await page.locator('#csv-input').setInputFiles({ name: 'saved-real.csv', mimeType: 'text/csv', buffer: Buffer.from(manifestCsv(2)) });
+  await expect(page.getByRole('heading', { name: 'saved-real', level: 1 })).toBeVisible();
+  await page.locator('#title').fill('Offline saved queue');
+  await context.setOffline(true);
+  await page.reload();
+  await expect(page.getByRole('heading', { name: 'saved-real', level: 1 })).toBeVisible();
+  await expect(page.locator('#title')).toHaveValue('Offline saved queue');
 });
 
 test('@claim:local-privacy free demo editing and export make same-origin requests only', async ({ page }) => {
@@ -162,7 +172,7 @@ test('@claim:free-limit free mode accepts 25 records and rejects 26', async ({ p
   await expect(page.getByText('0 of 25 ready')).toBeVisible();
 });
 
-test('@claim:field-edition shows the one-time price and accepts 26 records with a valid license fixture', async ({ page }) => {
+test('@claim:field-edition shows the one-time price and enables unlimited imports, saved shoots, and batch patterns with a valid license fixture', async ({ page }) => {
   await page.route('https://api.sociobot.in/**', async (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ valid: true, reason: 'ok', expires_at: null }) }));
   await openFreshDemo(page);
   await page.getByRole('button', { name: 'View pricing' }).click();
@@ -178,7 +188,11 @@ test('@claim:field-edition shows the one-time price and accepts 26 records with 
   await expect(page.getByText('0 of 26 ready')).toBeVisible();
   await page.getByRole('button', { name: 'Batch edit' }).click();
   await expect(page.getByRole('heading', { name: 'Apply to 26 records', level: 2 })).toBeVisible();
-  await page.getByRole('dialog').getByRole('button', { name: 'Close' }).click();
+  await page.locator('#batch-title').fill('Catalog {sequence} — {filename}');
+  page.once('dialog', (dialog) => dialog.accept());
+  await page.getByRole('button', { name: 'Apply changes' }).click();
+  await expect(page.locator('#title')).toHaveValue('Catalog 001 — FRAME_001');
+  await expect(page.locator('.toast')).toContainText('26 records updated.');
   const chooserPromise = page.waitForEvent('filechooser');
   await page.getByRole('button', { name: 'New shoot' }).click();
   const chooser = await chooserPromise;
@@ -220,6 +234,85 @@ test('@claim:backup-restore an exported demo backup restores changed records', a
   await page.locator('#backup-input').setInputFiles({ name: backup.name, mimeType: 'application/json', buffer: Buffer.from(backup.text) });
   await expect(page.locator('#title')).toHaveValue('Great blue heron lifting from reeds');
   await expect(page.locator('.specimen-row')).toHaveCount(3);
+});
+
+test('@claim:backup-cross-browser a JSON backup restores into a separate fresh browser workspace', async ({ page, browser }) => {
+  await openFreshDemo(page);
+  await page.locator('#title').fill('Portable salt-marsh record');
+  const backup = await downloadText(page, () => page.getByRole('button', { name: 'Export workspace backup' }).click());
+
+  const otherContext = await browser.newContext();
+  try {
+    const otherPage = await otherContext.newPage();
+    await otherPage.goto('http://127.0.0.1:4173/');
+    otherPage.once('dialog', (dialog) => dialog.accept());
+    await otherPage.locator('#backup-input').setInputFiles({ name: backup.name, mimeType: 'application/json', buffer: Buffer.from(backup.text) });
+    await expect(otherPage.getByRole('heading', { name: 'Salt marsh bird survey', level: 1 })).toBeVisible();
+    await expect(otherPage.locator('#title')).toHaveValue('Portable salt-marsh record');
+    await expect(otherPage.locator('.specimen-row')).toHaveCount(3);
+    await expect.poll(() => otherPage.evaluate(async () => (await indexedDB.databases()).map((entry) => entry.name))).toContain('caption-queue');
+  } finally {
+    await otherContext.close();
+  }
+});
+
+test('@claim:direct-sidecar-write compatible directory handles receive one XMP sidecar for every queue record', async ({ page }) => {
+  await openFreshDemo(page);
+  await page.evaluate(() => {
+    const writes: Record<string, string> = {};
+    (window as typeof window & { sidecarWrites: Record<string, string> }).sidecarWrites = writes;
+    window.showDirectoryPicker = async () => ({
+      getFileHandle: async (name: string) => ({
+        createWritable: async () => ({
+          write: async (content: string) => { writes[name] = content; },
+          close: async () => undefined
+        })
+      })
+    }) as unknown as FileSystemDirectoryHandle;
+  });
+  await page.getByRole('button', { name: 'Write 3 XMP sidecars' }).click();
+  await expect.poll(() => page.evaluate(() => Object.keys((window as typeof window & { sidecarWrites: Record<string, string> }).sidecarWrites).sort()))
+    .toEqual(['BIRDS_1842.xmp', 'BIRDS_1843.xmp', 'BIRDS_1844.xmp']);
+  const writes = await page.evaluate(() => (window as typeof window & { sidecarWrites: Record<string, string> }).sidecarWrites);
+  expect(writes['BIRDS_1842.xmp']).toContain('<x:xmpmeta');
+  expect(writes['BIRDS_1842.xmp']).toContain('Great blue heron lifting from reeds');
+});
+
+test('@claim:keyboard-save-next queue controls and Ctrl+Enter move and save a record', async ({ page }) => {
+  await openFreshDemo(page);
+  await page.locator('body').press('j');
+  await expect(page.getByRole('heading', { name: 'BIRDS_1843.JPG', level: 2 })).toBeVisible();
+  await page.getByRole('button', { name: '← Previous', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'BIRDS_1842.JPG', level: 2 })).toBeVisible();
+  await page.getByRole('button', { name: 'Next →', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'BIRDS_1843.JPG', level: 2 })).toBeVisible();
+  await page.getByRole('button', { name: /BIRDS_1844.JPG/ }).click();
+  await page.locator('#title').fill('Heron settling into cordgrass');
+  await page.locator('#description').fill('A great blue heron settles into cordgrass after the evening survey.');
+  await page.locator('#description').press('Control+Enter');
+  await expect(page.locator('.status-badge')).toContainText('Ready');
+  await expect(page.getByText('3 of 3 ready')).toBeVisible();
+});
+
+test('@claim:license-verification-privacy paid verification sends the pasted token as its only request value', async ({ page }) => {
+  let observed: { method: string; url: string; postData: string | null } | undefined;
+  await page.route('https://api.sociobot.in/api/v1/products/photo-metadata-queue/verify**', async (route) => {
+    const request = route.request();
+    observed = { method: request.method(), url: request.url(), postData: request.postData() };
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ valid: true, reason: 'ok' }) });
+  });
+  await clearBrowserData(page);
+  await page.getByRole('button', { name: 'View pricing' }).click();
+  await page.getByLabel('Have a license? Paste it here').fill('private-fixture-token');
+  await page.getByRole('button', { name: 'Verify license' }).click();
+  await expect(page.getByRole('button', { name: 'Field edition', exact: true })).toBeVisible();
+  expect(observed).toBeDefined();
+  const url = new URL(observed!.url);
+  expect(observed!.method).toBe('GET');
+  expect(`${url.origin}${url.pathname}`).toBe('https://api.sociobot.in/api/v1/products/photo-metadata-queue/verify');
+  expect([...url.searchParams.keys()]).toEqual(['license']);
+  expect(url.searchParams.get('license')).toBe('private-fixture-token');
+  expect(observed!.postData).toBeNull();
 });
 
 test('@claim:keyboard-controls queue movement and a landing import control are keyboard operable', async ({ page }) => {
