@@ -12,6 +12,15 @@ async function tabTo(page: Page, selector: string, limit = 80): Promise<void> {
   throw new Error(`Keyboard focus did not reach ${selector} after ${limit} Tab presses`);
 }
 
+async function waitForServiceWorkerControl(page: Page): Promise<void> {
+  await page.waitForFunction(async () => {
+    const registration = await navigator.serviceWorker?.getRegistration();
+    return registration?.active?.state === 'activated';
+  });
+  if (!await page.evaluate(() => navigator.serviceWorker?.controller !== null)) await page.reload();
+  await page.waitForFunction(() => navigator.serviceWorker?.controller !== null);
+}
+
 test.beforeEach(async ({ page }) => {
   await page.goto('/');
   await page.evaluate(async () => {
@@ -246,7 +255,7 @@ test('transient mobile toast actions meet the 44px touch target contract', async
   await page.getByRole('button', { name: 'Undo' }).click();
 
   // A waiting service worker uses the refresh toast.
-  await page.waitForFunction(() => navigator.serviceWorker?.controller !== null);
+  await waitForServiceWorkerControl(page);
   await page.evaluate(() => navigator.serviceWorker.register('/sw.js?qa-update=touch-target'));
   await expectTouchTarget('Refresh');
 });
@@ -369,13 +378,32 @@ test('installed shell reopens offline at mobile width', async ({ page, context }
   await expect(page.getByRole('heading', { name: 'wetlands', level: 1 })).toBeVisible();
   await expect(page.getByText('IMG_0001.jpg', { exact: true }).first()).toBeVisible();
   await expect(page.locator('main')).toBeVisible();
+  await expect(page.locator('#connection')).toHaveText('Offline · work is saved');
+  expect(await page.locator('#connection').evaluate((element) => {
+    const style = getComputedStyle(element);
+    const box = element.getBoundingClientRect();
+    return style.display !== 'none' && style.visibility !== 'hidden' && box.width > 0 && box.height > 0;
+  })).toBe(true);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+
+  await page.setViewportSize({ width: 320, height: 844 });
+  await page.reload();
+  await expect(page.locator('#connection')).toHaveText('Offline · work is saved');
+  expect(await page.locator('#connection').evaluate((element) => {
+    const style = getComputedStyle(element);
+    const box = element.getBoundingClientRect();
+    return style.display !== 'none' && style.visibility !== 'hidden' && box.width > 0 && box.height > 0;
+  })).toBe(true);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await context.setOffline(false);
 });
 
-test('installed shell announces a waiting service-worker update', async ({ page }) => {
+test('installed shell announces a waiting service-worker update', async ({ page, context }) => {
   const errors: string[] = [];
   page.on('console', (message) => { if (message.type() === 'error') errors.push(message.text()); });
   page.on('pageerror', (error) => errors.push(error.message));
-  await page.waitForFunction(() => navigator.serviceWorker?.controller !== null);
+  await context.setOffline(false);
+  await waitForServiceWorkerControl(page);
   await page.evaluate(() => navigator.serviceWorker.register('/sw.js?qa-update=1'));
   const toast = page.getByText('An update is ready.');
   await expect(toast).toBeVisible();

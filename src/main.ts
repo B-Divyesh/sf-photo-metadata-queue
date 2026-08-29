@@ -78,7 +78,7 @@ function shell(content: string): string {
     <nav aria-label="Utility navigation">
       <a class="nav-link" href="/demo" data-nav>Demo</a>
       <a class="nav-link nav-privacy" href="/privacy" data-nav>Privacy</a>
-      <span class="connection" id="connection"><span></span>${navigator.onLine ? 'Local & online' : 'Offline · work is saved'}</span>
+      <span class="connection ${navigator.onLine ? 'connection-online' : 'connection-offline'}" id="connection" role="status"><span></span>${navigator.onLine ? 'Local & online' : 'Offline · work is saved'}</span>
       <button class="icon-button" id="theme-button" aria-label="Change color theme" title="Change color theme">◐</button>
       <button class="quiet-button" id="license-button">${paid ? 'Field edition' : 'View pricing'}</button>
     </nav>

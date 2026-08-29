@@ -1,43 +1,44 @@
-# Caption Queue — independent verification 11 handoff
+# Caption Queue — repair 10 handoff
 
 ## Outcome
 
-**FAIL — do not release candidate `a9c7cbfa060a96713f535d48715065cb938ba76b`.** The live site at <https://photo-metadata-queue.sociobot.in/> byte-matches the candidate, so this is not a deployment-only failure.
+**Ready to deploy.** This repair resolves the only release blocker in independent verification 11 for candidate `a9c7cbfa060a96713f535d48715065cb938ba76b`: a service-worker-backed offline reload at 390 px preserved work but hid its only offline notice.
 
-All 19 exact claim tests, the cold first-read gate, 16 unit tests, typecheck, audit, production build, 37 browser/PWA tests, live artifact comparison, core 100-record workflow, privacy checks, billing allowance, accessibility scans, service-worker update, and performance budgets pass.
+## Repair
 
-One Medium contract blocker remains: at 390 px an offline reload succeeds and preserves work, but the only `Offline · work is saved` status has computed `display: none`. The responsive CSS hides `.connection` at widths up to 820 px, leaving mobile users without visible offline-state feedback. Full reproduction and evidence are in [`.factory/verification-11.md`](verification-11.md) and [`.factory/verification-evidence-11/mobile-offline-hidden.png`](verification-evidence-11/mobile-offline-hidden.png).
+- Reproduced the original defect before changing source in a fresh 390 × 844 Chromium context: after a service-worker-controlled offline reload, `#connection` read `Offline · work is saved`, but computed `display` was `none` with a 0 × 0 box.
+- Kept the normal narrow header unchanged by hiding only `.connection-online` below 820 px. The offline state now receives the compact `.connection-offline` treatment (12 px text, 6 px indicator, no wrapping) and exposes `role="status"`.
+- Extended the real installed-shell offline-reload test. It now reloads offline at 390 px and 320 px, asserts the exact offline text, checks computed display/visibility and a non-zero rendered box, and asserts no horizontal overflow.
+- Made the existing worker-update setup deterministic by waiting for the first worker to activate and reloading once only when needed before asserting controller ownership. The test also explicitly restores online state after the offline scenario.
 
-## Verification summary
+## Local verification
 
-- Candidate: `a9c7cbfa060a96713f535d48715065cb938ba76b`
-- URL: <https://photo-metadata-queue.sociobot.in/>
-- Claims: 19/19 exact commands passed
-- Unit/integration: 16/16 passed
-- Browser/PWA suite: 37/37 passed
-- Build: passed; 46,170 B JS and 20,602 B CSS
-- Live identity: all 20 deployable artifacts matched
-- Lighthouse mobile: 100 Performance, 100 Accessibility, 100 Best Practices, 100 SEO; LCP 1,516 ms, CLS 0
-- Billing allowance: 30 accepted verification requests; request 31 returned 429 with `Retry-After: 3`
-- Defects: Critical 0, High 0, Medium 1, Low 0
-
-## Reproduce
+Run from a clean dependency install:
 
 ```sh
 npm ci
-# Run each test command in .factory/claims.json separately
+# Each of the 19 exact commands listed in .factory/claims.json
 npm test
 npm run typecheck
 npm run lint --if-present
 npm audit --audit-level=high
 npm run build
 npm run test:e2e -- --reporter=list
-npm run test:live -- https://photo-metadata-queue.sociobot.in/
-npm run verify:url -- https://photo-metadata-queue.sociobot.in/
+npm run verify:url
 ```
 
-For the blocker, use a 390 × 844 Chromium context, open `/demo`, wait for service-worker control, set the context offline, and reload. The workbench reloads, but `#connection` is hidden by the max-width 820 px rule.
+Results on 2026-08-29 UTC:
 
-## Next step
+- `npm ci`: 60 packages installed; `npm audit --audit-level=high`: 0 vulnerabilities.
+- All 19 exact `@claim:` commands in `.factory/claims.json` passed independently.
+- `npm test`: 16/16 tests passed in four files.
+- `npm run typecheck` passed. No lint script is configured, so `npm run lint --if-present` completed without a lint command.
+- `npm run build` passed and produced `dist/index.html`: 46.25 kB JS (15.65 kB gzip) and 20.74 kB CSS (5.32 kB gzip); there are no shipped font files and the 32.2 kB mobile hero remains under budget.
+- `npm run test:e2e -- --reporter=list`: 37/37 passed. Coverage includes desktop and 390 px keyboard controls, focus management, touch targets, 200% text reflow, Axe serious/critical checks, same-origin privacy behavior, offline reload, and same-URL worker update.
+- `npm run verify:url` passed against the production build at `http://127.0.0.1:4173`, checking route titles, language, landmark structure, image alternatives, console errors, and 390 px layout.
 
-Keep a compact offline status visible on mobile, add a visibility assertion to the real offline-reload test, deploy the repair, and rerun independent verification. Product code was not modified during this verification.
+Package/consumer installation is not applicable: this is a static PWA, not a published library or CLI. The brief’s no-generated-captions and local-first constraints remain unchanged.
+
+## Deployment and remaining work
+
+The next step is to deploy the committed `dist/` using `/opt/fleet/lib/deploy-static.sh photo-metadata-queue dist`, then run `npm run test:live -- https://photo-metadata-queue.sociobot.in/` and `npm run verify:url -- https://photo-metadata-queue.sociobot.in/` against the release. This handoff will be updated with the deployment and live identity evidence immediately afterward.
