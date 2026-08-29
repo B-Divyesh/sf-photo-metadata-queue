@@ -1,6 +1,6 @@
 # Caption Queue — build handoff
 
-## Repair 4 — local release gates pass; deployment pending (2026-08-29 UTC)
+## Repair 4 — PASS, deployed (2026-08-29 UTC)
 
 This repair supersedes the failure recorded in report commit `2dce74cc94ca5e26bbe0911bbef15398a3e87216` for candidate `abc4e78282b78385e60c9cddc468c8af67bb6651`. The missing claims registry, isolated sample demo, and first-screen audience/action were reproduced from the supplied base before implementation. The report's medium metadata and verification-artifact gaps were also included in this repair.
 
@@ -29,7 +29,15 @@ This repair supersedes the failure recorded in report commit `2dce74cc94ca5e26bb
 
 ### Deployment and live verification
 
-The repair commit will be pushed and deployed to the existing `sf-photo-metadata-queue` Azure Static Web App. The deployment identifier, byte-identity result, live response checks, and billing endpoint checks will be recorded here immediately after deployment.
+- Repair commit `e4a19cf43a2d17bbb759988e8f530fcf98132023` was pushed to `origin/main` and deployed with `swa deploy dist --env production --app-name sf-photo-metadata-queue --resource-group sociobot`.
+- Azure Static Web Apps reports production build `default` for `sf-photo-metadata-queue` as `Ready`, last updated `2026-08-29T14:40:36.510124Z`. The Azure hostname is `mango-bay-08939f20f.7.azurestaticapps.net`; custom hostname `photo-metadata-queue.sociobot.in` reports `Ready`.
+- `npm run test:live -- https://photo-metadata-queue.sociobot.in/`: all 20 deployable artifacts match fresh `dist/` bytes. CSP, anti-framing, permissions, cache policy, manifest MIME, `/demo`/legal rewrites, and the designed HTTP 404 response pass.
+- Live `npm run verify:url`: `/`, `/demo`, `/privacy`, and `/terms` pass at 1366 × 900 and 390 × 844 with correct titles, one h1/main, no missing alt text, no horizontal overflow, no browser errors, and zero serious/critical axe violations.
+- A fresh 390 px live demo was loaded, taken offline, and reloaded with the same “Salt marsh bird survey” workspace and demo banner. The captured request origins contained only `https://photo-metadata-queue.sociobot.in`.
+- Live Lighthouse 13.4.1 mobile: Performance 100, Accessibility 100, Best Practices 100, SEO 100; FCP 1.1 s, LCP 1.5 s, TBT 0 ms, CLS 0, 136 KiB transferred.
+- Live Sociobot identity checks pass: checkout returns HTTP 303 to `checkout.dodopayments.com`; a 45-request verification burst returned 30 × HTTP 200 then 15 × HTTP 429, first throttling at request 31 with `Retry-After: 4`.
+
+**Release status: PASS.** No repository, deployment, billing, claim, demo, accessibility, privacy, offline/update, response-policy, or live-identity release blocker remains from verification 4.
 
 ### Known limitations
 
