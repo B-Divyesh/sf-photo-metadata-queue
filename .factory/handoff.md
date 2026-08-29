@@ -47,8 +47,15 @@ Run on 2026-08-29 UTC with Node and Playwright 1.58.2:
 
 ## Deployment and live evidence
 
-Deployment uses the work order configuration: `npm ci && npm test && npm run build`, then `/opt/fleet/lib/deploy-static.sh photo-metadata-queue dist`. Final live byte identity, routes, response headers, manifest, worker, and cache policy will be recorded here after deployment.
+Repair commit `18aa605` was pushed to `origin/main`. The exact work-order command, `npm ci && npm test && npm run build`, passed immediately before deployment. `/opt/fleet/lib/deploy-static.sh photo-metadata-queue dist` completed deployment `1f90861e-915e-4d50-98ff-20f0c595a25a` to the existing East US 2 Static Web App and confirmed HTTPS 200 at <https://photo-metadata-queue.sociobot.in/>.
+
+- `npm run test:live -- https://photo-metadata-queue.sociobot.in/` confirmed all 20 local production artifacts match live bytes. It also passed the manifest/worker checks, SPA routes, designed 404, CSP, response headers, and cache policy.
+- Live `npm run verify:url` passed all routes at desktop and 390px with correct semantics, no overflow, no console/page errors, and no serious/critical axe findings.
+- Live HTML and `sw.js` return `Cache-Control: no-cache, no-store, must-revalidate`; the hashed JS returns `public, max-age=31536000, immutable`.
+- Live responses include the shipped CSP, `frame-ancestors 'none'`, `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, strict referrer policy, COOP/CORP, HSTS, and restrictive Permissions-Policy.
+- The production checkout endpoint returned HTTP 303 to Dodo hosted checkout. No payment provider is embedded in the product.
+- Lighthouse 12.8.2 live mobile: Performance 100, Accessibility 100, Best Practices 100, SEO 100; LCP 1,507 ms, CLS 0, TBT 0 ms.
 
 ## Known gaps and next steps
 
-No product or release-blocking gap is known. The final operational step is deployment and live identity verification.
+No product, verification, deployment, or release-blocking gap is known. Independent release verification is the only remaining factory step.
