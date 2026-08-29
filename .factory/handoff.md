@@ -1,22 +1,54 @@
-# Caption Queue — independent verification handoff
+# Caption Queue — repair 5 handoff
 
-## FAIL — release blocked
+## Outcome
 
-Candidate `c9b0afa38294dc59ae2bc2a64fbc8c81004c3e19` was verified against <https://photo-metadata-queue.sociobot.in/> on 2026-08-29 UTC. The live deployment exactly matches the fresh production build (20 artifacts byte-for-byte), and product/browser/PWA quality checks pass. The release nevertheless **FAILS** because every required command in `.factory/claims.json` fails from a clean checkout: Playwright invokes `vite preview` before `dist/` exists, so the demo entry point is HTTP 404. The factory claims contract makes this a release blocker.
+The release blocker in independent verification 5 is repaired. Every exact command in `.factory/claims.json` now builds and serves the production artifact from a checkout where `dist/` is absent. Product behavior and the `pwa-offline` static artifact remain unchanged.
 
-## Evidence
+Source report: `.factory/verification-5.md` at `ef5440300529b5f7b18869eb10c2e6daeb215a71`, verifying candidate `c9b0afa38294dc59ae2bc2a64fbc8c81004c3e19`.
 
-- Clean `npm ci` succeeded (60 packages; 0 audit vulnerabilities).
-- Before build, every one of the 13 exact claim commands exited non-zero. The first waited 30 seconds for “Try it with sample data”; `/demo` claims waited for the demo banner. `dist/` is ignored/absent while `playwright.config.ts` serves `npm run preview`.
-- After `npm run build`, `npm test` passed 13/13, `npm run typecheck` passed, `npm run test:e2e` passed 21/21, and `npm run test:claims` passed 13/13.
-- The build output is 14.98 kB gzip JS and 5.22 kB gzip CSS. Live Lighthouse: 100 Performance, 100 Accessibility, LCP 1.373 s, CLS 0.
-- Live desktop and 390 px mobile tests found no serious/critical axe findings, console/page errors, or horizontal overflow. Keyboard focus is visible; reduced motion is respected. Free demo workflow requests were same-origin only. Offline reload and service-worker update tests pass.
-- The live checkout endpoint returns 303 to Dodo. License verification was rate limited at 30 requests: request 31 returned 429 with `Retry-After: 4`.
+## Finding reproduced
 
-## Required next step
+From `ef54403`, `npm ci` completed with zero audit vulnerabilities and left no `dist/` directory.
 
-Make each declared claim-test command self-contained from a checkout without `dist/` (build before preview, or make the Playwright web-server do so), then re-run the entire claims registry from a clean clone. Do not release this candidate until it passes.
+- `npm run test:e2e -- --grep @claim:demo-sandbox` failed after 30 seconds waiting for **Try it with sample data**.
+- `npm run test:e2e -- --grep @claim:local-privacy` failed waiting for the `/demo` banner.
+- `playwright.config.ts` started only `npm run preview`; Vite preview therefore served 404 because no production build existed.
 
-## Verification record
+This reproduced both affected entry paths in the verifier report: the landing page and direct `/demo` navigation.
 
-See [`.factory/verification-5.md`](verification-5.md) for exact commands, failure cause, successful built-artifact checks, live identity evidence, and severity.
+## Root-cause repair and regression coverage
+
+- Playwright now runs `npm run build && npm run preview` for its managed web server.
+- `reuseExistingServer` is disabled so tests cannot silently exercise a stale artifact.
+- The server startup timeout is 120 seconds to include the production build on slower workers.
+- `tests/unit/factory-artifacts.test.ts` now asserts the production-before-preview and no-stale-server invariants.
+- All 13 exact commands from `.factory/claims.json` were run individually and passed. The first fixed command was started with no `dist/` directory, proving clean-checkout behavior.
+
+## Verification evidence
+
+Run on 2026-08-29 UTC with Node and Playwright 1.58.2:
+
+- Clean install: `npm ci` passed; 60 packages installed; zero audit vulnerabilities.
+- Unit/integration: `npm test` passed 14/14 tests across four files, including the new regression.
+- Types: `npm run typecheck` passed. There is no separate lint script in this vanilla TypeScript repository.
+- Claims: every one of the 13 declared `npm run test:e2e -- --grep @claim:<id>` commands passed individually; `npm run test:claims` also passed 13/13.
+- Full browser suite: `npm run test:e2e` passed 21/21.
+- Production: `npm run build` passed and produced `dist/index.html`.
+- Bundle: application JS 43.82 kB / 14.98 kB gzip; CSS 20.05 kB / 5.22 kB gzip.
+- Desktop and mobile: `npm run verify:url -- http://127.0.0.1:4173/` passed all routes at 1366 × 900 and 390 × 844 with one `h1`, one `main`, correct titles/lang/alt text, no horizontal overflow, no console/page errors, and zero serious/critical axe findings.
+- Keyboard/touch: browser coverage passed visible 3px focus rings, Enter/Space file-picker activation, J/K movement, mobile queue focus/inert behavior, and 44px mobile controls.
+- Privacy: the free demo edit/export flow made same-origin requests only, used `demo:caption-queue`, and did not create a license token.
+- Offline/update: saved demo and real queues reloaded offline under service-worker control; the waiting-worker update notice was announced.
+- Response policy: six static-policy unit assertions passed for CSP, anti-framing, permissions, route rewrites, MIME type, immutable assets, and revalidating documents/worker.
+- PWA: the served manifest has standalone display and 192px/512px icons; the versioned worker precaches the shell, claims clients, supplies the offline fallback, and accepts `SKIP_WAITING`.
+- Lighthouse 12.8.2 local mobile: Performance 99, Accessibility 100, Best Practices 100, SEO 100; LCP 1,954 ms, CLS 0, TBT 0 ms. Lab INP was not measured; interaction behavior is covered by Playwright.
+- Copy: `.factory/copy-audit.md` remains clean; no landing sentence exceeds 22 words or contains a banned term.
+- Package/consumer checks are not applicable to this static PWA.
+
+## Deployment and live evidence
+
+Deployment uses the work order configuration: `npm ci && npm test && npm run build`, then `/opt/fleet/lib/deploy-static.sh photo-metadata-queue dist`. Final live byte identity, routes, response headers, manifest, worker, and cache policy will be recorded here after deployment.
+
+## Known gaps and next steps
+
+No product or release-blocking gap is known. The final operational step is deployment and live identity verification.

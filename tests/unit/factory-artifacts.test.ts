@@ -8,6 +8,7 @@ const root = process.cwd();
 const claims = JSON.parse(readFileSync(resolve(root, '.factory/claims.json'), 'utf8')) as Claim[];
 const claimTests = readFileSync(resolve(root, 'tests/e2e/claims.spec.ts'), 'utf8');
 const html = readFileSync(resolve(root, 'index.html'), 'utf8');
+const playwrightConfig = readFileSync(resolve(root, 'playwright.config.ts'), 'utf8');
 
 describe('factory verification artifacts', () => {
   it('maps every declared claim to exactly one tagged browser test', () => {
@@ -20,6 +21,11 @@ describe('factory verification artifacts', () => {
       expect(claim.test).toBe(`npm run test:e2e -- --grep @claim:${claim.id}`);
       expect(claimTests.match(new RegExp(`@claim:${claim.id}\\b`, 'g'))).toHaveLength(1);
     }
+  });
+
+  it('builds the production artifact before Playwright serves clean-clone claim tests', () => {
+    expect(playwrightConfig).toContain("command: 'npm run build && npm run preview'");
+    expect(playwrightConfig).toContain('reuseExistingServer: false');
   });
 
   it('ships canonical, social-card, and mobile-icon metadata', () => {
