@@ -1,0 +1,27 @@
+{
+  "records": 3,
+  "requiredRecovery": "3/3 ready",
+  "boundaries": {
+    "title": 256,
+    "caption": 2000
+  },
+  "focusAfterError": {
+    "tag": "BUTTON",
+    "text": "Mark ready & next"
+  },
+  "xmp": {
+    "name": "BIRDS_1842.xmp",
+    "escaped": true,
+    "parsed": true
+  },
+  "csvRows": 4,
+  "damagedBackupRetained": true,
+  "origins": [
+    "https://photo-metadata-queue.sociobot.in"
+  ],
+  "databases": [
+    "demo:caption-queue"
+  ],
+  "license": null,
+  "errors": []
+}

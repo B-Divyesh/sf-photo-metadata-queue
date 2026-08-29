@@ -1,0 +1,5 @@
+
+> photo-metadata-queue@1.0.0 verify:url
+> ./verify-url.sh https://photo-metadata-queue.sociobot.in
+
+URL verified at desktop semantics and 390px layout: https://photo-metadata-queue.sociobot.in

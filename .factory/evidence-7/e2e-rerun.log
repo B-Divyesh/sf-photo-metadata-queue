@@ -1,0 +1,48 @@
+
+> photo-metadata-queue@1.0.0 test:e2e
+> playwright test
+
+[WebServer] (node:5363) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:5395) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 27 tests using 2 workers
+(node:5414) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:5413) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:5413) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:5414) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+··························T
+
+  1) tests/e2e/app.spec.ts:213:1 › installed shell announces a waiting service-worker update ───────
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.waitForFunction: Test timeout of 30000ms exceeded.
+
+      215 |   page.on('console', (message) => { if (message.type() === 'error') errors.push(message.text()); });
+      216 |   page.on('pageerror', (error) => errors.push(error.message));
+    > 217 |   await page.waitForFunction(() => navigator.serviceWorker?.controller !== null);
+          |              ^
+      218 |   await page.evaluate(() => navigator.serviceWorker.register('/sw.js?qa-update=1'));
+      219 |   const toast = page.getByText('An update is ready.');
+      220 |   await expect(toast).toBeVisible();
+        at /work/repo/tests/e2e/app.spec.ts:217:14
+
+    Error Context: test-results/app-installed-shell-announ-ec0fc-iting-service-worker-update/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/app-installed-shell-announ-ec0fc-iting-service-worker-update/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/app-installed-shell-announ-ec0fc-iting-service-worker-update/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    tests/e2e/app.spec.ts:213:1 › installed shell announces a waiting service-worker update ────────
+  26 passed (1.6m)

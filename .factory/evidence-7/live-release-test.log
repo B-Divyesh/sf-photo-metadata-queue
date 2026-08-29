@@ -1,0 +1,5 @@
+
+> photo-metadata-queue@1.0.0 test:live
+> node tests/release/verify-live.mjs
+
+Live release verified: 20 artifacts match, response policies, SPA routes, and the 404 response pass at https://photo-metadata-queue.sociobot.in

@@ -1,0 +1,17 @@
+demo-sandbox: 1 tagged test occurrence
+offline-reload: 1 tagged test occurrence
+local-privacy: 1 tagged test occurrence
+xmp-export: 1 tagged test occurrence
+photo-import: 1 tagged test occurrence
+metadata-tools: 1 tagged test occurrence
+bulk-xmp: 1 tagged test occurrence
+free-limit: 1 tagged test occurrence
+field-edition: 1 tagged test occurrence
+local-persistence: 1 tagged test occurrence
+csv-export: 1 tagged test occurrence
+backup-restore: 1 tagged test occurrence
+backup-cross-browser: 1 tagged test occurrence
+direct-sidecar-write: 1 tagged test occurrence
+keyboard-save-next: 1 tagged test occurrence
+license-verification-privacy: 1 tagged test occurrence
+keyboard-controls: 1 tagged test occurrence

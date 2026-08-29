@@ -1,0 +1,86 @@
+{
+  "tabSequence": [
+    {
+      "tag": "A",
+      "text": "Skip to main content",
+      "id": "",
+      "outline": "rgb(179, 79, 22) solid 3px",
+      "box": [
+        198.578125,
+        43
+      ]
+    },
+    {
+      "tag": "BODY",
+      "text": "Skip to main content",
+      "id": "",
+      "outline": "rgb(29, 42, 34) none 0px",
+      "box": [
+        390,
+        844
+      ]
+    },
+    {
+      "tag": "A",
+      "text": "Skip to main content",
+      "id": "",
+      "outline": "rgb(179, 79, 22) solid 3px",
+      "box": [
+        198.578125,
+        43
+      ]
+    },
+    {
+      "tag": "A",
+      "text": "Caption Queue",
+      "id": "",
+      "outline": "rgb(179, 79, 22) solid 3px",
+      "box": [
+        144.765625,
+        30
+      ]
+    },
+    {
+      "tag": "A",
+      "text": "Demo",
+      "id": "",
+      "outline": "rgb(179, 79, 22) solid 3px",
+      "box": [
+        39.359375,
+        44
+      ]
+    },
+    {
+      "tag": "BUTTON",
+      "text": "◐",
+      "id": "theme-button",
+      "outline": "rgb(179, 79, 22) solid 3px",
+      "box": [
+        44,
+        44
+      ]
+    },
+    {
+      "tag": "BUTTON",
+      "text": "View pricing",
+      "id": "license-button",
+      "outline": "rgb(179, 79, 22) solid 3px",
+      "box": [
+        107.453125,
+        44
+      ]
+    },
+    {
+      "tag": "A",
+      "text": "Try it with sample data",
+      "id": "",
+      "outline": "rgb(179, 79, 22) solid 3px",
+      "box": [
+        358,
+        44
+      ]
+    }
+  ],
+  "keyboardActions": "PASS: sample action Enter, J/K navigation, mobile queue focus open/return",
+  "overflow": 0
+}

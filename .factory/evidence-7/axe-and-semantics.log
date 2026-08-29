@@ -1,0 +1,378 @@
+{
+  "config": {
+    "route": "/",
+    "w": 1440,
+    "h": 900,
+    "color": "light"
+  },
+  "severe": [],
+  "allViolations": 0,
+  "errors": [],
+  "info": {
+    "title": "Caption Queue — Write photo metadata offline",
+    "lang": "en",
+    "h1": 1,
+    "main": 1,
+    "overflow": 0,
+    "imgs": [
+      {
+        "alt": "A blank herbarium sheet with a fern, archival sleeves, and an empty contact sheet arranged on a wooden worktable",
+        "w": 629,
+        "h": 419
+      }
+    ],
+    "motion": [
+      {
+        "a": "1e-05s",
+        "t": "1e-05s"
+      },
+      {
+        "a": "1e-05s",
+        "t": "1e-05s"
+      },
+      {
+        "a": "1e-05s",
+        "t": "1e-05s"
+      },
+      {
+        "a": "1e-05s",
+        "t": "1e-05s"
+      },
+      {
+        "a": "1e-05s",
+        "t": "1e-05s"
+      },
+      {
+        "a": "1e-05s",
+        "t": "1e-05s"
+      },
+      {
+        "a": "1e-05s",
+        "t": "1e-05s"
+      },
+      {
+        "a": "1e-05s",
+        "t": "1e-05s"
+      },
+      {
+        "a": "1e-05s",
+        "t": "1e-05s"
+      },
+      {
+        "a": "1e-05s",
+        "t": "1e-05s"
+      }
+    ]
+  }
+}
+{
+  "config": {
+    "route": "/",
+    "w": 390,
+    "h": 844,
+    "color": "dark"
+  },
+  "severe": [],
+  "allViolations": 0,
+  "errors": [],
+  "info": {
+    "title": "Caption Queue — Write photo metadata offline",
+    "lang": "en",
+    "h1": 1,
+    "main": 1,
+    "overflow": 0,
+    "imgs": [
+      {
+        "alt": "A blank herbarium sheet with a fern, archival sleeves, and an empty contact sheet arranged on a wooden worktable",
+        "w": 324,
+        "h": 216
+      }
+    ],
+    "motion": [
+      {
+        "a": "1e-05s",
+        "t": "1e-05s"
+      },
+      {
+        "a": "1e-05s",
+        "t": "1e-05s"
+      },
+      {
+        "a": "1e-05s",
+        "t": "1e-05s"
+      },
+      {
+        "a": "1e-05s",
+        "t": "1e-05s"
+      },
+      {
+        "a": "1e-05s",
+        "t": "1e-05s"
+      },
+      {
+        "a": "1e-05s",
+        "t": "1e-05s"
+      },
+      {
+        "a": "1e-05s",
+        "t": "1e-05s"
+      },
+      {
+        "a": "1e-05s",
+        "t": "1e-05s"
+      },
+      {
+        "a": "1e-05s",
+        "t": "1e-05s"
+      },
+      {
+        "a": "1e-05s",
+        "t": "1e-05s"
+      }
+    ]
+  }
+}
+{
+  "config": {
+    "route": "/demo",
+    "w": 1440,
+    "h": 1000,
+    "color": "light"
+  },
+  "severe": [],
+  "allViolations": 0,
+  "errors": [],
+  "info": {
+    "title": "Demo — Caption Queue",
+    "lang": "en",
+    "h1": 1,
+    "main": 1,
+    "overflow": 0,
+    "imgs": [],
+    "motion": [
+      {
+        "a": "1e-05s",
+        "t": "1e-05s"
+      },
+      {
+        "a": "1e-05s",
+        "t": "1e-05s"
+      },
+      {
+        "a": "1e-05s",
+        "t": "1e-05s"
+      },
+      {
+        "a": "1e-05s",
+        "t": "1e-05s"
+      },
+      {
+        "a": "1e-05s",
+        "t": "1e-05s"
+      },
+      {
+        "a": "1e-05s",
+        "t": "1e-05s"
+      },
+      {
+        "a": "1e-05s",
+        "t": "1e-05s"
+      },
+      {
+        "a": "1e-05s",
+        "t": "1e-05s"
+      },
+      {
+        "a": "1e-05s",
+        "t": "1e-05s"
+      },
+      {
+        "a": "1e-05s",
+        "t": "1e-05s"
+      }
+    ]
+  }
+}
+{
+  "config": {
+    "route": "/demo",
+    "w": 390,
+    "h": 844,
+    "color": "dark"
+  },
+  "severe": [],
+  "allViolations": 0,
+  "errors": [],
+  "info": {
+    "title": "Demo — Caption Queue",
+    "lang": "en",
+    "h1": 1,
+    "main": 1,
+    "overflow": 0,
+    "imgs": [],
+    "motion": [
+      {
+        "a": "1e-05s",
+        "t": "1e-05s"
+      },
+      {
+        "a": "1e-05s",
+        "t": "1e-05s"
+      },
+      {
+        "a": "1e-05s",
+        "t": "1e-05s"
+      },
+      {
+        "a": "1e-05s",
+        "t": "1e-05s"
+      },
+      {
+        "a": "1e-05s",
+        "t": "1e-05s"
+      },
+      {
+        "a": "1e-05s",
+        "t": "1e-05s"
+      },
+      {
+        "a": "1e-05s",
+        "t": "1e-05s"
+      },
+      {
+        "a": "1e-05s",
+        "t": "1e-05s"
+      },
+      {
+        "a": "1e-05s",
+        "t": "1e-05s"
+      },
+      {
+        "a": "1e-05s",
+        "t": "1e-05s"
+      }
+    ]
+  }
+}
+{
+  "config": {
+    "route": "/privacy",
+    "w": 390,
+    "h": 844,
+    "color": "light"
+  },
+  "severe": [],
+  "allViolations": 0,
+  "errors": [],
+  "info": {
+    "title": "Privacy — Caption Queue",
+    "lang": "en",
+    "h1": 1,
+    "main": 1,
+    "overflow": 0,
+    "imgs": [],
+    "motion": [
+      {
+        "a": "1e-05s",
+        "t": "1e-05s"
+      },
+      {
+        "a": "1e-05s",
+        "t": "1e-05s"
+      },
+      {
+        "a": "1e-05s",
+        "t": "1e-05s"
+      },
+      {
+        "a": "1e-05s",
+        "t": "1e-05s"
+      },
+      {
+        "a": "1e-05s",
+        "t": "1e-05s"
+      },
+      {
+        "a": "1e-05s",
+        "t": "1e-05s"
+      },
+      {
+        "a": "1e-05s",
+        "t": "1e-05s"
+      },
+      {
+        "a": "1e-05s",
+        "t": "1e-05s"
+      },
+      {
+        "a": "1e-05s",
+        "t": "1e-05s"
+      },
+      {
+        "a": "1e-05s",
+        "t": "1e-05s"
+      }
+    ]
+  }
+}
+{
+  "config": {
+    "route": "/terms",
+    "w": 390,
+    "h": 844,
+    "color": "light"
+  },
+  "severe": [],
+  "allViolations": 0,
+  "errors": [],
+  "info": {
+    "title": "Terms — Caption Queue",
+    "lang": "en",
+    "h1": 1,
+    "main": 1,
+    "overflow": 0,
+    "imgs": [],
+    "motion": [
+      {
+        "a": "1e-05s",
+        "t": "1e-05s"
+      },
+      {
+        "a": "1e-05s",
+        "t": "1e-05s"
+      },
+      {
+        "a": "1e-05s",
+        "t": "1e-05s"
+      },
+      {
+        "a": "1e-05s",
+        "t": "1e-05s"
+      },
+      {
+        "a": "1e-05s",
+        "t": "1e-05s"
+      },
+      {
+        "a": "1e-05s",
+        "t": "1e-05s"
+      },
+      {
+        "a": "1e-05s",
+        "t": "1e-05s"
+      },
+      {
+        "a": "1e-05s",
+        "t": "1e-05s"
+      },
+      {
+        "a": "1e-05s",
+        "t": "1e-05s"
+      },
+      {
+        "a": "1e-05s",
+        "t": "1e-05s"
+      }
+    ]
+  }
+}

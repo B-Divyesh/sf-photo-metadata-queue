@@ -1,0 +1,83 @@
+{
+  "scrollWidth": 492,
+  "viewport": 390,
+  "overflowElements": [
+    {
+      "tag": "SPAN",
+      "cls": "",
+      "id": "",
+      "text": "Photo metadata stays on this device during the free workflow.",
+      "left": 40,
+      "right": 492,
+      "width": 452,
+      "scrollWidth": 452,
+      "clientWidth": 452
+    },
+    {
+      "tag": "SPAN",
+      "cls": "",
+      "id": "",
+      "text": "DemoPrivacyTermsSource",
+      "left": 40,
+      "right": 492,
+      "width": 452,
+      "scrollWidth": 452,
+      "clientWidth": 452
+    },
+    {
+      "tag": "A",
+      "cls": "",
+      "id": "",
+      "text": "Source",
+      "left": 404.1,
+      "right": 492,
+      "width": 87.9,
+      "scrollWidth": 88,
+      "clientWidth": 88
+    },
+    {
+      "tag": "SMALL",
+      "cls": "",
+      "id": "",
+      "text": "Caption Queue v1.0.0 · Built by Param Factory · Field-desk image generated for this produc",
+      "left": 40,
+      "right": 492,
+      "width": 452,
+      "scrollWidth": 452,
+      "clientWidth": 452
+    },
+    {
+      "tag": "NAV",
+      "cls": "",
+      "id": "",
+      "text": "Demo Privacy Local & online ◐ View pricing",
+      "left": 188.2,
+      "right": 475.3,
+      "width": 287.1,
+      "scrollWidth": 287,
+      "clientWidth": 287
+    },
+    {
+      "tag": "BUTTON",
+      "cls": "quiet-button",
+      "id": "license-button",
+      "text": "View pricing",
+      "left": 336.5,
+      "right": 475.3,
+      "width": 138.8,
+      "scrollWidth": 137,
+      "clientWidth": 137
+    },
+    {
+      "tag": "DIV",
+      "cls": "sr-only",
+      "id": "live",
+      "text": "",
+      "left": -1,
+      "right": 0,
+      "width": 1,
+      "scrollWidth": 1,
+      "clientWidth": 1
+    }
+  ]
+}

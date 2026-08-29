@@ -1,0 +1,13 @@
+{
+  "burstAccepted": 2,
+  "burstLast": {
+    "status": 429,
+    "retry": "4"
+  },
+  "browserStatus": 429,
+  "browserRetry": "4",
+  "message": "The license service asked us to wait 60 seconds before retrying.",
+  "button": "View pricing",
+  "activeCount": 0,
+  "verdict": null
+}

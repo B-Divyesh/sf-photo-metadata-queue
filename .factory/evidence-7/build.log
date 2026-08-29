@@ -1,0 +1,13 @@
+
+> photo-metadata-queue@1.0.0 build
+> tsc --noEmit && vite build
+
+vite v6.4.3 building for production...
+transforming...
+✓ 10 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                  2.18 kB │ gzip:  0.75 kB
+dist/assets/index-DSiUgAFA.css  20.05 kB │ gzip:  5.22 kB
+dist/assets/index-DMq9IRqJ.js   45.31 kB │ gzip: 15.42 kB │ map: 97.37 kB
+✓ built in 424ms

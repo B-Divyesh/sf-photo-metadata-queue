@@ -1,0 +1,13 @@
+{
+  "request": 31,
+  "status": 429,
+  "headers": {
+    "access-control-allow-credentials": "true",
+    "content-length": "30",
+    "date": "Sat, 29 Aug 2026 17:03:32 GMT",
+    "retry-after": "4",
+    "set-cookie": "ARRAffinitySameSite=27a68b7e77a8b7692bcb4c16e2a8a32d44ecdf1f351d0e078d158af264a88edc;Path=/;HttpOnly;SameSite=None;Secure;Domain=api.sociobot.in",
+    "vary": "origin, access-control-request-method, access-control-request-headers",
+    "x-ratelimit-after": "4"
+  }
+}

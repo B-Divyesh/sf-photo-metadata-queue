@@ -1,0 +1,5 @@
+{
+  "before": "https://photo-metadata-queue.sociobot.in/sw.js",
+  "after": "https://photo-metadata-queue.sociobot.in/sw.js?qa-update-apply=7",
+  "updateApplied": true
+}
