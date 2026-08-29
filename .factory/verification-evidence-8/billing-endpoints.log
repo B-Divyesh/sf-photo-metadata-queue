@@ -1,0 +1,42 @@
+Checkout endpoint
+HTTP/2 303 
+date: Sat, 29 Aug 2026 18:37:03 GMT
+access-control-allow-credentials: true
+location: https://checkout.dodopayments.com/session/cks_0NmSfj0iRAqImgJhoQ3zu
+set-cookie: ARRAffinity=27a68b7e77a8b7692bcb4c16e2a8a32d44ecdf1f351d0e078d158af264a88edc;Path=/;HttpOnly;Secure;Domain=api.sociobot.in
+set-cookie: ARRAffinitySameSite=27a68b7e77a8b7692bcb4c16e2a8a32d44ecdf1f351d0e078d158af264a88edc;Path=/;HttpOnly;SameSite=None;Secure;Domain=api.sociobot.in
+vary: origin, access-control-request-method, access-control-request-headers
+content-length: 0
+
+License verification rate limit
+request=1 status=200 retry-after=none exposed=none
+request=2 status=200 retry-after=none exposed=none
+request=3 status=200 retry-after=none exposed=none
+request=4 status=200 retry-after=none exposed=none
+request=5 status=200 retry-after=none exposed=none
+request=6 status=200 retry-after=none exposed=none
+request=7 status=200 retry-after=none exposed=none
+request=8 status=200 retry-after=none exposed=none
+request=9 status=200 retry-after=none exposed=none
+request=10 status=200 retry-after=none exposed=none
+request=11 status=200 retry-after=none exposed=none
+request=12 status=200 retry-after=none exposed=none
+request=13 status=200 retry-after=none exposed=none
+request=14 status=200 retry-after=none exposed=none
+request=15 status=200 retry-after=none exposed=none
+request=16 status=200 retry-after=none exposed=none
+request=17 status=200 retry-after=none exposed=none
+request=18 status=200 retry-after=none exposed=none
+request=19 status=200 retry-after=none exposed=none
+request=20 status=200 retry-after=none exposed=none
+request=21 status=200 retry-after=none exposed=none
+request=22 status=200 retry-after=none exposed=none
+request=23 status=200 retry-after=none exposed=none
+request=24 status=200 retry-after=none exposed=none
+request=25 status=200 retry-after=none exposed=none
+request=26 status=200 retry-after=none exposed=none
+request=27 status=200 retry-after=none exposed=none
+request=28 status=200 retry-after=none exposed=none
+request=29 status=200 retry-after=none exposed=none
+request=30 status=200 retry-after=none exposed=none
+request=31 status=429 retry-after=3 exposed=none

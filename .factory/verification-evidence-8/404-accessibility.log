@@ -1,0 +1,14 @@
+{
+  "status": 404,
+  "title": "Page not found — Caption Queue",
+  "lang": "en",
+  "h1": [
+    "This page is not in the queue"
+  ],
+  "main": 1,
+  "seriousCritical": [],
+  "overflow": false,
+  "errors": [
+    "Failed to load resource: the server responded with a status of 404 ()"
+  ]
+}

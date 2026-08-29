@@ -1,0 +1,55 @@
+{
+  "viewport": {
+    "width": 390,
+    "height": 844,
+    "scrollWidth": 390
+  },
+  "boxes": {
+    "h1": {
+      "text": "Caption large shoots without changing originals",
+      "box": {
+        "x": 16,
+        "y": 174.1875,
+        "width": 358,
+        "height": 128.296875
+      }
+    },
+    ".lede": {
+      "text": "For photographers with large shoots, it turns folders or CSV files into a focused queue for clean XMP sidecars.",
+      "box": {
+        "x": 16,
+        "y": 331.421875,
+        "width": 358,
+        "height": 88.3125
+      }
+    },
+    "a.primary-button": {
+      "text": "Try it with sample data",
+      "box": {
+        "x": 16,
+        "y": 451.734375,
+        "width": 358,
+        "height": 44
+      }
+    },
+    ".action-note": {
+      "text": "Opens three edited sample records.",
+      "box": {
+        "x": 16,
+        "y": 507.734375,
+        "width": 358,
+        "height": 17.71875
+      }
+    },
+    ".fact-list": {
+      "text": "Runs offline after the first visit.Photos and metadata stay on this device.Free for 25 records per shoot. Field edition costs $24 once.",
+      "box": {
+        "x": 16,
+        "y": 713.453125,
+        "width": 358,
+        "height": 78.375
+      }
+    }
+  },
+  "firstScreenComplete": true
+}

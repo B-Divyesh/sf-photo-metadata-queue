@@ -1,0 +1,28 @@
+{
+  "label": "Dismiss message",
+  "box": {
+    "x": 334.59375,
+    "y": 771,
+    "width": 27.40625,
+    "height": 36
+  },
+  "style": {
+    "minWidth": "auto",
+    "minHeight": "36px",
+    "padding": "1px 6px"
+  }
+}
+{
+  "label": "Refresh",
+  "box": {
+    "x": 287.578125,
+    "y": 772,
+    "width": 74.421875,
+    "height": 36
+  },
+  "style": {
+    "minHeight": "36px",
+    "minWidth": "auto",
+    "padding": "1px 6px"
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "base": "https://photo-metadata-queue.sociobot.in",
+  "desktop": {
+    "status": 200,
+    "headers": {
+      "cache-control": "no-cache, no-store, must-revalidate",
+      "content-encoding": "br",
+      "content-security-policy": "default-src 'self'; base-uri 'self'; connect-src 'self' https://api.sociobot.in; font-src 'self'; form-action 'self' https://api.sociobot.in; frame-ancestors 'none'; img-src 'self' blob: data:; manifest-src 'self'; object-src 'none'; script-src 'self'; style-src 'self'; worker-src 'self'",
+      "content-type": "text/html",
+      "cross-origin-opener-policy": "same-origin",
+      "cross-origin-resource-policy": "same-origin",
+      "date": "Sat, 29 Aug 2026 18:36:19 GMT",
+      "etag": "\"55984423\"",
+      "last-modified": "Sat, 29 Aug 2026 18:11:30 GMT",
+      "permissions-policy": "camera=(), geolocation=(), microphone=(), payment=(), usb=()",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "strict-transport-security": "max-age=10886400; includeSubDomains; preload",
+      "vary": "Accept-Encoding",
+      "x-content-type-options": "nosniff",
+      "x-dns-prefetch-control": "off",
+      "x-frame-options": "DENY",
+      "x-xss-protection": "1; mode=block"
+    },
+    "demoRecords": 3,
+    "invalid": {
+      "live": "2 required items remain. Add a title.",
+      "focused": true,
+      "outline": "rgb(179, 79, 22) solid 3px"
+    },
+    "recoveredReady": "3 of 3",
+    "titleBoundary": 256,
+    "captionBoundary": 2000,
+    "xmp": {
+      "name": "BIRDS_1842.xmp",
+      "xmlParsed": true,
+      "sensitiveTextEscaped": true
+    },
+    "csvRowsIncludingHeader": 4,
+    "damagedBackupRetainedRecords": 3,
+    "requestOrigins": [
+      "https://photo-metadata-queue.sociobot.in"
+    ],
+    "indexedDb": [
+      "caption-queue",
+      "demo:caption-queue"
+    ],
+    "licenseStored": null
+  },
+  "mobile": {
+    "seriousCriticalAxe": [],
+    "undersized": [],
+    "motion": {
+      "transition": "1e-05s",
+      "animation": "1e-05s",
+      "reduced": true
+    },
+    "reflow": {
+      "viewport": 390,
+      "scrollWidth": 390
+    }
+  },
+  "pwa": {
+    "controlled": true,
+    "offlineReloadRetainedEdit": true,
+    "updateToast": true,
+    "waitingBefore": true,
+    "controller": "https://photo-metadata-queue.sociobot.in/sw.js?verification-8-update=1"
+  },
+  "errors": []
+}

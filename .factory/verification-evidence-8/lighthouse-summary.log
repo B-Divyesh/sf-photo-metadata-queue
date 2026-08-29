@@ -1,0 +1,19 @@
+{
+  "lighthouseVersion": "12.8.2",
+  "fetchTime": "2026-08-29T18:38:22.005Z",
+  "categories": {
+    "performance": 96,
+    "accessibility": 100,
+    "best-practices": 100,
+    "seo": 100
+  },
+  "metrics": {
+    "FCP": 1134.3875,
+    "LCP": 1510.3875,
+    "TBT": 220,
+    "CLS": 0,
+    "SpeedIndex": 1134.3875,
+    "TTI": 1518.0875,
+    "totalBytes": 139534
+  }
+}

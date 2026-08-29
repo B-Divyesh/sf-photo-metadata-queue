@@ -1,0 +1,23 @@
+{
+  "focusedSkip": {
+    "tag": "A",
+    "text": "Skip to main content",
+    "outline": "rgb(179, 79, 22) solid 3px",
+    "box": {
+      "width": 198.578125,
+      "height": 44
+    }
+  },
+  "afterActivation": {
+    "hash": "#main",
+    "activeTag": "BODY",
+    "activeId": "",
+    "scrollY": 48
+  },
+  "nextTab": {
+    "tag": "A",
+    "text": "Try it with sample data",
+    "href": "/demo"
+  },
+  "expectedNextTab": "first focusable control inside main, not header wordmark"
+}

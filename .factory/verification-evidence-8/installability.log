@@ -1,0 +1,42 @@
+{
+  "installability": {
+    "installabilityErrors": []
+  },
+  "manifest": {
+    "url": "https://photo-metadata-queue.sociobot.in/manifest.webmanifest",
+    "errors": [],
+    "data": "{\n  \"name\": \"Caption Queue\",\n  \"short_name\": \"Caption Queue\",\n  \"description\": \"Write photo metadata locally and export clean XMP sidecars.\",\n  \"start_url\": \"/?source=pwa&v=2\",\n  \"scope\": \"/\",\n  \"display\": \"standalone\",\n  \"background_color\": \"#f3efe3\",\n  \"theme_color\": \"#285b42\",\n  \"icons\": [\n    { \"src\": \"/assets/icon-192.png\", \"sizes\": \"192x192\", \"type\": \"image/png\" },\n    { \"src\": \"/assets/icon-512.png\", \"sizes\": \"512x512\", \"type\": \"image/png\" },\n    { \"src\": \"/assets/icon-maskable-512.png\", \"sizes\": \"512x512\", \"type\": \"image/png\", \"purpose\": \"maskable\" }\n  ]\n}\n",
+    "parsed": {
+      "scope": "https://photo-metadata-queue.sociobot.in/"
+    },
+    "manifest": {
+      "backgroundColor": "rgba(243,239,227,1)",
+      "description": "Write photo metadata locally and export clean XMP sidecars.",
+      "display": "kStandalone",
+      "icons": [
+        {
+          "url": "https://photo-metadata-queue.sociobot.in/assets/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        },
+        {
+          "url": "https://photo-metadata-queue.sociobot.in/assets/icon-512.png",
+          "sizes": "512x512",
+          "type": "image/png"
+        },
+        {
+          "url": "https://photo-metadata-queue.sociobot.in/assets/icon-maskable-512.png",
+          "sizes": "512x512",
+          "type": "image/png"
+        }
+      ],
+      "id": "https://photo-metadata-queue.sociobot.in/?source=pwa&v=2",
+      "name": "Caption Queue",
+      "orientation": "DEFAULT",
+      "preferRelatedApplications": false,
+      "scope": "https://photo-metadata-queue.sociobot.in/",
+      "startUrl": "https://photo-metadata-queue.sociobot.in/?source=pwa&v=2",
+      "themeColor": "rgba(40,91,66,1)"
+    }
+  }
+}

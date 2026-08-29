@@ -1,0 +1,13 @@
+{
+  "message": "That license is not active. Check the token and try again.",
+  "button": "View pricing",
+  "active": 0,
+  "requests": [
+    {
+      "method": "GET",
+      "url": "https://api.sociobot.in/api/v1/products/photo-metadata-queue/verify?license=verification-8-invalid-ui-token",
+      "body": null
+    }
+  ],
+  "storedVerdict": "{\"valid\":false,\"checkedAt\":1788028830074}"
+}
