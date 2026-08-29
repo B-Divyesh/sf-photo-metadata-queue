@@ -400,7 +400,7 @@ document.documentElement.dataset.theme = localStorage.getItem('cq-theme') ?? (ma
 render();
 
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').then((registration) => {
-  registration.addEventListener('updatefound', () => { const worker = registration.installing; worker?.addEventListener('statechange', () => { if (worker.state === 'installed' && navigator.serviceWorker.controller) { const toast = document.createElement('div'); toast.className = 'toast'; toast.innerHTML = '<span>An update is ready.</span><button>Refresh</button>'; toast.querySelector('button')!.addEventListener('click', () => { worker.postMessage('SKIP_WAITING'); location.reload(); }); document.body.append(toast); } }); });
+  registration.addEventListener('updatefound', () => { const worker = registration.installing; worker?.addEventListener('statechange', () => { if (worker.state === 'installed' && navigator.serviceWorker.controller) { const toast = document.createElement('div'); toast.className = 'toast'; toast.innerHTML = '<span>An update is ready.</span><button>Refresh</button>'; const refresh = toast.querySelector<HTMLButtonElement>('button')!; let applying = false; refresh.addEventListener('click', () => { if (applying) return; applying = true; refresh.disabled = true; navigator.serviceWorker.addEventListener('controllerchange', () => location.reload(), { once: true }); worker.postMessage('SKIP_WAITING'); }); document.body.append(toast); } }); });
 }).catch(() => { /* app remains usable without install support */ });
 
 export function exportCsv(items: QueueItem[]): string {
