@@ -205,6 +205,52 @@ test('all visible mobile links and buttons meet the 44px touch target contract',
   }
 });
 
+test('transient mobile toast actions meet the 44px touch target contract', async ({ page }) => {
+  const expectTouchTarget = async (name: string): Promise<void> => {
+    const button = page.getByRole('button', { name });
+    await expect(button).toBeVisible();
+    const box = await button.boundingBox();
+    expect(box, `${name} should have a rendered box`).not.toBeNull();
+    expect(box!.width, `${name} should be at least 44px wide`).toBeGreaterThanOrEqual(44);
+    expect(box!.height, `${name} should be at least 44px tall`).toBeGreaterThanOrEqual(44);
+  };
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/demo');
+
+  // Validation failures use the dismissible notice toast.
+  await page.getByRole('button', { name: /Queue 1\/3/ }).click();
+  await page.getByRole('button', { name: /BIRDS_1844.JPG/ }).click();
+  await page.getByRole('button', { name: 'Mark ready & next' }).click();
+  await expectTouchTarget('Dismiss message');
+  await page.getByRole('button', { name: 'Dismiss message' }).click();
+
+  // Batch edits use the reversible Undo toast. Seed the recorded valid verdict
+  // before loading the real workspace, just as the Field-edition claim does.
+  await Promise.all([
+    page.waitForURL('http://127.0.0.1:4173/'),
+    page.getByRole('button', { name: 'Start for real' }).click()
+  ]);
+  await page.evaluate(() => {
+    localStorage.setItem('sb_license:photo-metadata-queue', 'touch-target-fixture');
+    localStorage.setItem('sb_license:photo-metadata-queue:verdict', JSON.stringify({ valid: true, checkedAt: Date.now() }));
+  });
+  await page.reload();
+  await page.locator('#csv-input').setInputFiles({ name: 'touch-targets.csv', mimeType: 'text/csv', buffer: Buffer.from(csv) });
+  await page.getByRole('button', { name: /Queue 1\/2/ }).click();
+  await page.getByRole('button', { name: 'Batch edit' }).click();
+  await page.locator('#batch-title').fill('Checked {sequence}');
+  page.once('dialog', (dialog) => dialog.accept());
+  await page.getByRole('button', { name: 'Apply changes' }).click();
+  await expectTouchTarget('Undo');
+  await page.getByRole('button', { name: 'Undo' }).click();
+
+  // A waiting service worker uses the refresh toast.
+  await page.waitForFunction(() => navigator.serviceWorker?.controller !== null);
+  await page.evaluate(() => navigator.serviceWorker.register('/sw.js?qa-update=touch-target'));
+  await expectTouchTarget('Refresh');
+});
+
 test('primary routes reflow without horizontal scrolling at 200 percent text size', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   for (const path of ['/', '/demo', '/privacy', '/terms']) {
