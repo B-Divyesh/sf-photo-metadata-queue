@@ -1,5 +1,41 @@
 # Caption Queue — build handoff
 
+## Repair 4 — local release gates pass; deployment pending (2026-08-29 UTC)
+
+This repair supersedes the failure recorded in report commit `2dce74cc94ca5e26bbe0911bbef15398a3e87216` for candidate `abc4e78282b78385e60c9cddc468c8af67bb6651`. The missing claims registry, isolated sample demo, and first-screen audience/action were reproduced from the supplied base before implementation. The report's medium metadata and verification-artifact gaps were also included in this repair.
+
+### Release-blocking findings repaired
+
+- Added `.factory/claims.json` with 13 visitor-facing promises. Each has exactly one `@claim:<id>` Playwright test and a documented clean-state sandbox. A unit guard rejects missing, duplicate, or untagged claims.
+- Added `/demo` and `?demo=1` entry points with three realistic “Salt marsh bird survey” records. Demo data uses `demo:caption-queue`; real work stays in `caption-queue`. Reset restores the fixture, Start for real deletes the demo database, and demo mode never reads the real workspace or license token.
+- Added the required first-screen **Try it with sample data** action. The headline now states the job in six words, and the 19-word supporting sentence names photographers with large shoots.
+- Added a persistent demo banner, reset and start-real controls, `.factory/demo.md`, and `.factory/copy-audit.md`.
+- Added route-specific titles and descriptions, canonical/Open Graph/Twitter metadata, a 1200 × 630 social image derived from the original art, a 180 × 180 Apple touch icon, `/demo` sitemap coverage, and a designed HTTP 404 response.
+- Added `verify-url.sh`/`npm run verify:url`. It checks titles, language, landmarks, one h1, image alternatives, 390 px overflow, browser errors, and serious/critical axe results at 1366 px and 390 px.
+- Closed an existing mobile keyboard risk found during the repair audit: the closed off-canvas queue is now inert and hidden from accessibility APIs; opening moves focus to Close queue, and closing returns focus to the trigger.
+- Removed the offline page's inline style so the deployed CSP does not log a violation. The service-worker cache is versioned as `caption-queue-v2` and includes demo, 404, offline, and social assets.
+
+### Local verification evidence
+
+- Clean `npm ci`: 60 packages installed; `npm audit --audit-level=high`: 0 vulnerabilities.
+- `npm run typecheck`: pass. `npm test`: 4 files, 13/13 tests pass. `git diff --check`: pass.
+- `npm run build`: pass with `dist/index.html` at the root. Initial app assets are 43.82 kB JavaScript (14.98 kB gzip) and 20.05 kB CSS (5.22 kB gzip).
+- `npm run test:e2e`: 21 Chromium tests pass, including the 13 exact claim tests, desktop/mobile import controls, 390 px touch targets, mobile queue focus management, light/dark axe scans, offline persistence, and the update-ready toast.
+- `npm run test:claims`: all 13 declared claim tests pass independently from clean demo entry points.
+- `npm run verify:url -- http://127.0.0.1:4173/`: all four app routes pass at 1366 × 900 and 390 × 844 with no browser errors or serious/critical axe violations.
+- Azure Static Web Apps emulator: all 20 deployable artifacts match `dist/`; CSP, anti-framing, permissions, cache policy, manifest MIME, `/demo`/legal rewrites, and designed HTTP 404 response pass.
+- Lighthouse 13.4.1 mobile: Performance 99, Accessibility 100, Best Practices 100, SEO 100; FCP 1.1 s, LCP 2.0 s, TBT 0 ms, CLS 0, 135 KiB transferred.
+- Manual full-page review at 1366 × 900 and 390 × 844 confirmed the first-screen hierarchy, no horizontal overflow, and the populated demo layout. The social image is 1200 × 630 and 119 kB.
+
+### Deployment and live verification
+
+The repair commit will be pushed and deployed to the existing `sf-photo-metadata-queue` Azure Static Web App. The deployment identifier, byte-identity result, live response checks, and billing endpoint checks will be recorded here immediately after deployment.
+
+### Known limitations
+
+- Direct bulk folder writing depends on Chromium's File System Access API. Other browsers receive individual standards-valid XMP downloads.
+- Browser-only code cannot preview every proprietary RAW format. Undecodable files remain editable queue records with a clear file placeholder.
+
 ## Independent verification 4 — FAIL (2026-08-28 UTC)
 
 Candidate `abc4e78282b78385e60c9cddc468c8af67bb6651` was independently verified from a clean detached checkout against <https://photo-metadata-queue.sociobot.in/>.

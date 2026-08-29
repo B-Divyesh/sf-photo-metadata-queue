@@ -57,9 +57,13 @@ assert.match(workerResponse.headers.get('cache-control') ?? '', /no-(?:cache|sto
 const manifestResponse = await get('/manifest.webmanifest');
 assert.match(manifestResponse.headers.get('content-type') ?? '', /^application\/manifest\+json\b/);
 
-for (const route of ['/privacy', '/terms']) {
+for (const route of ['/demo', '/privacy', '/terms']) {
   const response = await get(route);
   assert.deepEqual(Buffer.from(await response.arrayBuffer()), htmlBytes, `${route} is not the SPA shell`);
 }
 
-console.log(`Live release verified: ${localFiles.length} artifacts match, response policies pass, and SPA routes resolve at ${base.origin}`);
+const missingResponse = await fetch(new URL('/this-page-does-not-exist', base), { redirect: 'manual' });
+assert.equal(missingResponse.status, 404, 'unknown routes must return HTTP 404');
+assert.deepEqual(Buffer.from(await missingResponse.arrayBuffer()), await readFile(join(dist, '404.html')), 'unknown routes must use the designed 404 page');
+
+console.log(`Live release verified: ${localFiles.length} artifacts match, response policies, SPA routes, and the 404 response pass at ${base.origin}`);

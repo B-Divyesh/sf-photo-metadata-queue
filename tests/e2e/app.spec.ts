@@ -115,6 +115,22 @@ test('mobile editor touch controls meet the 44px target contract', async ({ page
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 });
 
+test('closed mobile queue is inert and opening it manages keyboard focus', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.locator('#csv-input').setInputFiles({ name: 'wetlands.csv', mimeType: 'text/csv', buffer: Buffer.from(csv) });
+  const queue = page.locator('.queue-panel');
+  await expect(queue).toHaveAttribute('inert', '');
+  await expect(queue).toHaveAttribute('aria-hidden', 'true');
+  await expect(page.getByRole('heading', { name: 'wetlands', level: 1 })).toBeVisible();
+  const toggle = page.getByRole('button', { name: /Queue/ });
+  await toggle.click();
+  await expect(queue).not.toHaveAttribute('inert');
+  await expect(page.getByRole('button', { name: 'Close queue' })).toBeFocused();
+  await page.keyboard.press('Enter');
+  await expect(queue).toHaveAttribute('inert', '');
+  await expect(toggle).toBeFocused();
+});
+
 test('installed shell reopens offline at mobile width', async ({ page, context }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');
@@ -126,4 +142,16 @@ test('installed shell reopens offline at mobile width', async ({ page, context }
   await expect(page.getByRole('heading', { name: 'wetlands', level: 1 })).toBeVisible();
   await expect(page.getByText('IMG_0001.jpg', { exact: true }).first()).toBeVisible();
   await expect(page.locator('main')).toBeVisible();
+});
+
+test('installed shell announces a waiting service-worker update', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('console', (message) => { if (message.type() === 'error') errors.push(message.text()); });
+  page.on('pageerror', (error) => errors.push(error.message));
+  await page.waitForFunction(() => navigator.serviceWorker?.controller !== null);
+  await page.evaluate(() => navigator.serviceWorker.register('/sw.js?qa-update=1'));
+  const toast = page.getByText('An update is ready.');
+  await expect(toast).toBeVisible();
+  await expect.poll(() => page.evaluate(async () => Boolean((await navigator.serviceWorker.getRegistration())?.waiting))).toBe(true);
+  expect(errors).toEqual([]);
 });

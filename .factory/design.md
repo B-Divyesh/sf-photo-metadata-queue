@@ -56,4 +56,4 @@ Prompt sheet:
 - Composition: quiet asymmetry, useful negative space, no interface mockup
 - Negative list: no readable text, watermark, logos, hands, people, cameras, flowers, fantasy glow, gradients, plastic 3D, or misleading AI imagery
 
-Generated with the factory Azure image deployment (`factory-image`) on 2026-08-28. The selected output is original to this product and shipped as responsive WebP (71 KB desktop, 32 KB mobile), with a PNG source and prompt sidecar in `assets/src/`. Application icons and small line illustrations are hand-authored SVG and MIT-licensed with the repository.
+Generated with the factory Azure image deployment (`factory-image`) on 2026-08-28. The selected output is original to this product and shipped as responsive WebP (71 KB desktop, 32 KB mobile), with a PNG source and prompt sidecar in `assets/src/`. The 1200 × 630 social card added on 2026-08-29 is a center crop of that same original source. Application icons and small line illustrations are hand-authored SVG and MIT-licensed with the repository.

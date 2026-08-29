@@ -1,5 +1,6 @@
 import './styles.css';
-import { loadData, saveData } from './db';
+import { clearData, loadData, saveData, type StorageScope } from './db';
+import { createDemoData } from './demo';
 import { csvToItems, escapeCsv } from './csv';
 import { emptyMetadata, type AppData, type Metadata, type QueueItem, type Shoot } from './types';
 import { makeXmp, renderTokens, sidecarName, validateMetadata } from './xmp';
@@ -12,7 +13,14 @@ declare global {
 }
 
 const app = document.querySelector<HTMLDivElement>('#app')!;
-let data: AppData = await loadData();
+const demoEntry = () => location.pathname === '/demo' || new URLSearchParams(location.search).get('demo') === '1';
+let demoMode = demoEntry();
+if (demoMode && location.pathname !== '/demo') history.replaceState({}, '', '/demo');
+let data: AppData = await loadData(demoMode ? 'demo' : 'real');
+if (demoMode && !data.items.length) {
+  data = createDemoData();
+  await saveData(data, 'demo');
+}
 let paid = false;
 let licenseNotice = '';
 let filter: 'all' | 'unfinished' | 'ready' = 'all';
@@ -21,15 +29,18 @@ let showQueue = false;
 let undoSnapshot: QueueItem[] | null = null;
 const imageUrls = new Map<string, string>();
 
-captureLicense();
-paid = hasLicense();
-if (paid) verifyLicense().then((valid) => { if (!valid) licenseNotice = 'Your license is no longer active.'; paid = valid; render(); });
+if (!demoMode) {
+  captureLicense();
+  paid = hasLicense();
+  if (paid) verifyLicense().then((valid) => { if (!valid) licenseNotice = 'Your license is no longer active.'; paid = valid; render(); });
+}
 
 const e = (value: unknown) => String(value ?? '').replace(/[&<>'"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[char]!);
 const activeShoot = (): Shoot | undefined => data.shoots.find((s) => s.id === data.activeShootId) ?? data.shoots[0];
 const shootItems = (): QueueItem[] => data.items.filter((item) => item.shootId === activeShoot()?.id);
 const activeItem = (): QueueItem | undefined => data.items.find((item) => item.id === data.activeItemId) ?? shootItems()[0];
-const persist = () => saveData(data).catch(() => announce('Could not save locally. Export a backup before closing.'));
+const storageScope = (): StorageScope => demoMode ? 'demo' : 'real';
+const persist = () => saveData(data, storageScope()).catch(() => announce('Could not save locally. Export a backup before closing.'));
 const announce = (message: string) => {
   const live = document.querySelector<HTMLElement>('#live');
   if (live) live.textContent = message;
@@ -53,40 +64,47 @@ function icon(name: 'leaf' | 'check' | 'photo' | 'download' | 'plus' | 'settings
 
 function shell(content: string): string {
   return `<header class="topbar">
-    <a class="brand" href="/" data-nav><span class="brand-mark">${icon('leaf')}</span><span>Caption Queue</span></a>
+    <a class="brand" href="${demoMode ? '/demo' : '/'}" data-nav><span class="brand-mark">${icon('leaf')}</span><span>Caption Queue</span></a>
     <nav aria-label="Utility navigation">
+      <a class="nav-link" href="/demo" data-nav>Demo</a>
+      <a class="nav-link nav-privacy" href="/privacy" data-nav>Privacy</a>
       <span class="connection" id="connection"><span></span>${navigator.onLine ? 'Local & online' : 'Offline · work is saved'}</span>
       <button class="icon-button" id="theme-button" aria-label="Change color theme" title="Change color theme">◐</button>
-      <button class="quiet-button" id="license-button">${paid ? 'Field edition' : 'Unlock'}</button>
+      <button class="quiet-button" id="license-button">${paid ? 'Field edition' : 'View pricing'}</button>
     </nav>
   </header>
   <div id="live" class="sr-only" aria-live="polite"></div>
+  ${demoMode ? `<aside class="demo-banner" aria-label="Demo mode"><strong>Demo — sample data, nothing is saved</strong><span>Your real workspace stays separate.</span><div><button class="quiet-button" id="reset-demo">Reset demo</button><button class="primary-button" data-start-real>Start for real</button></div></aside>` : ''}
   ${licenseNotice ? `<div class="license-notice" role="status">${e(licenseNotice)} <button id="renew-license">View license options</button></div>` : ''}
   ${content}
-  <footer><span>Private by design. Your photos never leave this device.</span><span><a href="/privacy" data-nav>Privacy</a><a href="/terms" data-nav>Terms</a><a href="https://github.com/B-Divyesh/sf-photo-metadata-queue" rel="noreferrer">Source</a></span><small>Field-desk image generated for Caption Queue.</small></footer>
+  <footer><span>Photo metadata stays on this device during the free workflow.</span><span><a href="/demo" data-nav>Demo</a><a href="/privacy" data-nav>Privacy</a><a href="/terms" data-nav>Terms</a><a href="https://github.com/B-Divyesh/sf-photo-metadata-queue" rel="noreferrer">Source</a></span><small>Caption Queue v1.0.0 · Built by Param Factory · Field-desk image generated for this product.</small></footer>
   ${licenseDialog()}`;
 }
 
 function landing(): string {
   return shell(`<main id="main" class="landing">
     <section class="hero">
-      <div class="hero-copy"><p class="eyebrow">A local metadata workbench</p><h1>Caption the shoot.<br><em>Keep your originals untouched.</em></h1>
-        <p class="lede">Turn a folder or spreadsheet into a deliberate queue for titles, captions, keywords, and IPTC fields—then write standards-valid XMP sidecars.</p>
+      <div class="hero-copy"><p class="eyebrow">Local photo metadata queue</p><h1>Caption large shoots without changing originals</h1>
+        <p class="lede">For photographers with large shoots, it turns folders or CSV files into a focused queue for clean XMP sidecars.</p>
         <div class="hero-actions">
-          <button class="primary-button" type="button" data-file-picker="photo-input">${icon('photo')} Choose photo folder</button>
+          <a class="primary-button" href="/demo" data-nav>Try it with sample data</a>
+          <span class="action-note">Opens three edited sample records.</span>
+          <button class="secondary-button" type="button" data-file-picker="photo-input">${icon('photo')} Choose photo folder</button>
           <button class="secondary-button" type="button" data-file-picker="csv-input">Import CSV</button>
           <button class="secondary-button" type="button" data-file-picker="backup-input">Restore backup</button>
         </div>
         <input class="sr-only" id="photo-input" type="file" accept="image/*,.dng,.cr2,.cr3,.nef,.arw,.raf" multiple webkitdirectory tabindex="-1" aria-hidden="true" />
         <input class="sr-only" id="csv-input" type="file" accept=".csv,text/csv" tabindex="-1" aria-hidden="true" />
         <input class="sr-only" id="backup-input" type="file" accept=".json,application/json" tabindex="-1" aria-hidden="true" />
-        <p class="microcopy">No upload. No account. Sidecars only—original image bytes are never modified.</p>
+        <ul class="fact-list"><li>Runs offline after the first visit.</li><li>Photos and metadata stay on this device.</li><li>Free for 25 records per shoot. Field edition costs $24 once.</li></ul>
       </div>
       <figure class="hero-plate"><picture><source media="(max-width: 680px)" srcset="/assets/field-desk-mobile.webp"><img src="/assets/field-desk.webp" width="1200" height="800" alt="A blank herbarium sheet with a fern, archival sleeves, and an empty contact sheet arranged on a wooden worktable" decoding="async" fetchpriority="high"></picture><figcaption><span>Plate 01</span> From contact sheet to catalog record</figcaption></figure>
     </section>
-    <section class="workflow" aria-labelledby="workflow-title"><div><p class="eyebrow">The working method</p><h2 id="workflow-title">A queue, not another catalog</h2><p>Bring only the shoot in front of you. Reuse the words that matter, validate every record, and hand clean sidecars back to your DAM.</p></div>
-      <ol><li><span>01</span><strong>Gather</strong><p>Start from an image folder or an existing CSV manifest.</p></li><li><span>02</span><strong>Annotate</strong><p>Move image by image with shared terms and smart tokens.</p></li><li><span>03</span><strong>Press</strong><p>Review the exact XML and write <code>.xmp</code> beside your files.</p></li></ol>
+    <section class="workflow" aria-labelledby="workflow-title"><div><p class="eyebrow">How it works</p><h2 id="workflow-title">Move one photograph at a time</h2><p>Keep one shoot in view. Reuse its terms, check every record, then send clean sidecars to your DAM.</p></div>
+      <ol><li><span>01</span><strong>Gather</strong><p>Start from an image folder or a CSV file.</p></li><li><span>02</span><strong>Annotate</strong><p>Move image by image with shared terms and caption tokens.</p></li><li><span>03</span><strong>Export</strong><p>Review the XML and export <code>.xmp</code> sidecars.</p></li></ol>
     </section>
+    <section class="boundaries" aria-labelledby="privacy-title"><div><p class="eyebrow">Privacy and limits</p><h2 id="privacy-title">Your files stay under your control</h2></div><div><p>Caption Queue stores the workspace in this browser. It sends nothing during the free metadata workflow.</p><p>It writes XMP sidecars. It does not change image files or generate captions for you.</p><a href="/privacy" data-nav>Read the privacy details</a></div></section>
+    <section class="pricing" aria-labelledby="pricing-title"><div><p class="eyebrow">One-time license</p><h2 id="pricing-title">Use the free queue or remove its limit</h2></div><div><p><strong>$24 once</strong></p><p>Field edition removes the 25-record import limit, adds saved shoots, and enables batch edit patterns. Core XMP and data exports remain free.</p><button class="primary-button" id="landing-license-button">View Field edition</button></div></section>
   </main>`);
 }
 
@@ -95,19 +113,21 @@ function workspace(): string {
   const items = shootItems();
   const current = activeItem();
   if (!current) return landing();
+  const narrow = matchMedia('(max-width: 820px)').matches;
+  const queueHidden = narrow && !showQueue;
   const ready = items.filter((item) => item.ready).length;
   const visible = items.filter((item) => (filter === 'all' || (filter === 'ready') === item.ready) && item.fileName.toLowerCase().includes(query.toLowerCase()));
   const position = items.findIndex((item) => item.id === current.id);
   return shell(`<main id="main" class="workbench">
-    <aside class="queue-panel ${showQueue ? 'queue-open' : ''}" aria-label="Photo queue">
-      <div class="shoot-heading"><div><span class="eyebrow">Current shoot</span><h1>${e(shoot.name)}</h1>${data.shoots.length > 1 ? `<label class="sr-only" for="shoot-select">Choose shoot</label><select id="shoot-select">${data.shoots.map((s) => `<option value="${e(s.id)}" ${s.id === shoot.id ? 'selected' : ''}>${e(s.name)}</option>`).join('')}</select>` : ''}</div><button class="icon-button mobile-close" id="close-queue" aria-label="Close queue">×</button></div>
+    <aside id="photo-queue" class="queue-panel ${showQueue ? 'queue-open' : ''}" aria-label="Photo queue" ${queueHidden ? 'aria-hidden="true" inert' : ''}>
+      <div class="shoot-heading"><div><span class="eyebrow">Current shoot</span>${narrow ? `<h2>${e(shoot.name)}</h2>` : `<h1>${e(shoot.name)}</h1>`}${data.shoots.length > 1 ? `<label class="sr-only" for="shoot-select">Choose shoot</label><select id="shoot-select">${data.shoots.map((s) => `<option value="${e(s.id)}" ${s.id === shoot.id ? 'selected' : ''}>${e(s.name)}</option>`).join('')}</select>` : ''}</div><button class="icon-button mobile-close" id="close-queue" aria-label="Close queue">×</button></div>
       <div class="progress-row"><span>${ready} of ${items.length} ready</span><span>${Math.round(ready / items.length * 100)}%</span></div><progress class="progress" aria-label="Shoot completion" max="100" value="${ready / items.length * 100}">${Math.round(ready / items.length * 100)}%</progress>
       <div class="queue-tools"><label><span class="sr-only">Search filenames</span><input id="queue-search" type="search" placeholder="Search filenames" value="${e(query)}"></label><select id="queue-filter" aria-label="Filter queue"><option value="all" ${filter === 'all' ? 'selected' : ''}>All</option><option value="unfinished" ${filter === 'unfinished' ? 'selected' : ''}>Needs work</option><option value="ready" ${filter === 'ready' ? 'selected' : ''}>Ready</option></select></div>
       <ol class="specimen-list">${visible.map((item) => queueRow(item, items.indexOf(item))).join('') || '<li class="no-results">No photographs match this filter.</li>'}</ol>
       <div class="queue-bottom"><button class="secondary-button" id="new-shoot">${icon('plus')} New shoot</button><button class="quiet-button" id="batch-button">Batch edit</button></div>
     </aside>
     <section class="editor" aria-label="Metadata editor">
-      <div class="editor-bar"><button class="queue-toggle" id="queue-toggle">${icon('queue')} Queue <span>${position + 1}/${items.length}</span></button><div><button class="quiet-button" id="previous-button" ${position === 0 ? 'disabled' : ''}>← Previous</button><button class="quiet-button" id="next-button" ${position === items.length - 1 ? 'disabled' : ''}>Next →</button></div></div>
+      ${narrow ? `<h1 class="mobile-workspace-title">${e(shoot.name)}</h1>` : ''}<div class="editor-bar"><button class="queue-toggle" id="queue-toggle" aria-expanded="${showQueue}" aria-controls="photo-queue">${icon('queue')} Queue <span>${position + 1}/${items.length}</span></button><div><button class="quiet-button" id="previous-button" ${position === 0 ? 'disabled' : ''}>← Previous</button><button class="quiet-button" id="next-button" ${position === items.length - 1 ? 'disabled' : ''}>Next →</button></div></div>
       <article class="annotation-sheet">
         <header class="specimen-header"><div class="thumb">${previewFor(current)}</div><div><p class="accession">Specimen ${String(position + 1).padStart(3, '0')} / ${String(items.length).padStart(3, '0')}</p><h2>${e(current.fileName)}</h2><p>${current.size ? formatBytes(current.size) : 'CSV record'} · ${e(current.relativePath)}</p></div><span class="status-badge ${current.ready ? 'is-ready' : ''}">${current.ready ? `${icon('check')} Ready` : 'In progress'}</span></header>
         <form id="metadata-form" novalidate>${editorFields(current, shoot)}
@@ -159,32 +179,85 @@ function batchDialog(shoot: Shoot, items: QueueItem[]): string {
 }
 
 function licenseDialog(): string {
-  return `<dialog id="license-dialog"><div class="dialog-card license-card"><header><div><span class="eyebrow">Field edition</span><h2>Keep large shoots moving</h2></div><button class="icon-button dialog-close" aria-label="Close">×</button></header>${paid ? `<div class="license-active">${icon('check')}<div><strong>Field edition is active</strong><p>Unlimited saved shoots and reusable batch recipes are unlocked on this device.</p></div></div><button class="danger-link" id="remove-license">Remove license from this device</button>` : `<p class="price"><strong>$24</strong> one-time purchase</p><ul><li>Unlimited saved shoots</li><li>Reusable batch patterns</li><li>Support independent development</li></ul><p>The free edition handles one active shoot with up to 25 records. XMP writing, backups, accessibility, and privacy are always included.</p><a class="primary-button" href="${checkoutUrl}">Buy Field edition</a><hr><form id="restore-form"><label for="license-token">Have a license? Paste it here</label><div><input id="license-token" autocomplete="off" required><button class="secondary-button">Verify</button></div><p id="license-message" role="status"></p></form>`}<small>Sociobot/Dodo is the merchant of record. Refunds are handled there and revoke the license. See <a href="/terms" data-nav>terms</a> and <a href="/privacy" data-nav>privacy</a>.</small></div></dialog>`;
+  const inactive = `<p class="price"><strong>$24</strong> one-time purchase</p><ul><li>No record limit per imported shoot</li><li>More than one saved shoot</li><li>Batch title, caption, and keyword patterns</li></ul><p>The free edition handles one active shoot with up to 25 records. XMP writing, backups, accessibility, and privacy remain free.</p><a class="primary-button" href="${checkoutUrl}">Buy Field edition</a>${demoMode ? `<p>Start for real before restoring a license.</p><button class="secondary-button" data-start-real>Start for real</button>` : `<hr><form id="restore-form"><label for="license-token">Have a license? Paste it here</label><div><input id="license-token" autocomplete="off" required><button class="secondary-button">Verify license</button></div><p id="license-message" role="status"></p></form>`}`;
+  return `<dialog id="license-dialog"><div class="dialog-card license-card"><header><div><span class="eyebrow">Field edition</span><h2>Handle shoots above 25 records</h2></div><button class="icon-button dialog-close" aria-label="Close">×</button></header>${paid ? `<div class="license-active">${icon('check')}<div><strong>Field edition is active</strong><p>The record limit, saved-shoot limit, and batch-pattern limit are removed on this device.</p></div></div><button class="danger-link" id="remove-license">Remove license from this device</button>` : inactive}<small>Sociobot/Dodo is the merchant of record. Refunds are handled there and revoke the license. See <a href="/terms" data-nav>terms</a> and <a href="/privacy" data-nav>privacy</a>.</small></div></dialog>`;
 }
 
 function legalPage(kind: 'privacy' | 'terms'): string {
-  const privacy = `<p class="eyebrow">Last updated 28 August 2026</p><h2>Privacy, in plain language</h2><p class="lede">Caption Queue is local-first. Your photographs, captions, keywords, and workspace records stay in your browser unless you explicitly export them.</p><h3>What stays on your device</h3><p>Queue data is stored in IndexedDB. A license token and its last verification result are stored in localStorage. You can remove either through the app or your browser settings.</p><h3>What leaves your device</h3><p>Photos and metadata are never uploaded by Caption Queue. When you verify a paid license, only that token is sent to Sociobot's licensing API. The hosted checkout has its own payment privacy terms. This app contains no analytics, advertising, tracking pixels, or third-party scripts.</p><h3>Your control</h3><p>Use “Export workspace backup” before clearing browser storage. Clearing site data deletes the local workspace and license from this device.</p>`;
-  const terms = `<p class="eyebrow">Last updated 28 August 2026</p><h2>Terms of use</h2><p class="lede">Caption Queue helps prepare XMP metadata. You remain responsible for reviewing the accuracy, rights, and suitability of every record you export.</p><h3>License and purchase</h3><p>The free edition is usable without an account. Field edition is a $24 one-time license for the purchaser. Sociobot/Dodo is merchant of record and handles checkout and refunds. A refund or charge reversal revokes the license.</p><h3>Your data</h3><p>You own your photographs and metadata. Caption Queue does not claim rights to them. Exported sidecars are provided as generated; keep backups and test them with your DAM before a production handoff.</p><h3>Warranty</h3><p>The software is provided “as is,” without warranties. To the maximum extent permitted by law, the authors are not liable for lost data, missed delivery, or downstream metadata changes.</p>`;
-  return shell(`<main id="main" class="legal"><h1>Caption Queue</h1><article>${kind === 'privacy' ? privacy : terms}<p><a class="secondary-button" href="/" data-nav>← Back to the workbench</a></p></article></main>`);
+  const privacy = `<p class="eyebrow">Last updated 29 August 2026</p><h1>Keep your photo metadata private</h1><p class="lede">Your photographs, captions, keywords, and workspace records stay in this browser unless you export them.</p><h2>What stays on your device</h2><p>Queue data is stored in IndexedDB. A license token and its last verification result are stored in localStorage. You can remove either through the app or your browser settings.</p><h2>What leaves your device</h2><p>Caption Queue does not upload photos or metadata. When you verify a paid license, it sends only that token to Sociobot's licensing API. The hosted checkout has its own payment privacy terms. This app contains no analytics, advertising, tracking pixels, or third-party scripts.</p><h2>Your control</h2><p>Export a workspace backup before clearing browser storage. Clearing site data deletes the local workspace and license from this device.</p>`;
+  const terms = `<p class="eyebrow">Last updated 29 August 2026</p><h1>Terms for using Caption Queue</h1><p class="lede">Caption Queue helps prepare XMP metadata. You remain responsible for every record you export.</p><h2>License and purchase</h2><p>The free edition works without an account. Field edition is a $24 one-time license for the purchaser. Sociobot/Dodo is merchant of record and handles checkout and refunds. A refund or charge reversal revokes the license.</p><h2>Your data</h2><p>You own your photographs and metadata. Caption Queue does not claim rights to them. Keep backups and test exported sidecars with your DAM before a production handoff.</p><h2>Warranty</h2><p>The software is provided “as is,” without warranties. To the maximum extent permitted by law, the authors are not liable for lost data, missed delivery, or downstream metadata changes.</p>`;
+  return shell(`<main id="main" class="legal"><aside aria-hidden="true">Caption Queue</aside><article>${kind === 'privacy' ? privacy : terms}<p><a class="secondary-button" href="/" data-nav>Back to Caption Queue</a></p></article></main>`);
 }
 
-function render(): void {
+function notFoundPage(): string {
+  return shell(`<main id="main" class="not-found"><p class="eyebrow">Page not found</p><h1>This page is not in the queue</h1><p>Return to Caption Queue or open the sample workspace.</p><div><a class="primary-button" href="/" data-nav>Return home</a><a class="secondary-button" href="/demo" data-nav>Open sample data</a></div></main>`);
+}
+
+function updateRouteMetadata(): void {
   const path = location.pathname;
-  app.innerHTML = path === '/privacy' ? legalPage('privacy') : path === '/terms' ? legalPage('terms') : data.items.length ? workspace() : landing();
+  const knownAppPath = path === '/' || path === '/privacy' || path === '/terms' || path === '/demo';
+  const title = path === '/privacy' ? 'Privacy — Caption Queue' : path === '/terms' ? 'Terms — Caption Queue' : demoMode ? 'Demo — Caption Queue' : !knownAppPath ? 'Page not found — Caption Queue' : data.items.length ? `${activeShoot()?.name ?? 'Workspace'} — Caption Queue` : 'Caption Queue — Write photo metadata offline';
+  const descriptions: Record<string, string> = {
+    '/privacy': 'How Caption Queue stores photo metadata locally and when license verification contacts Sociobot.',
+    '/terms': 'Terms for using Caption Queue and its one-time Field edition license.',
+    '/demo': 'Try Caption Queue with three isolated sample records. Your real workspace stays separate.'
+  };
+  document.title = title;
+  document.querySelector<HTMLMetaElement>('meta[name="description"]')!.content = descriptions[path] ?? 'Write titles, captions, keywords, and XMP sidecars in a private offline photo queue.';
+  document.querySelector<HTMLLinkElement>('link[rel="canonical"]')!.href = `https://photo-metadata-queue.sociobot.in${path === '/' ? '/' : path}`;
+  document.querySelectorAll<HTMLMetaElement>('meta[property="og:title"], meta[name="twitter:title"]').forEach((meta) => { meta.content = title; });
+  document.querySelectorAll<HTMLMetaElement>('meta[property="og:description"], meta[name="twitter:description"]').forEach((meta) => { meta.content = descriptions[path] ?? 'Write photo metadata locally and export clean XMP sidecars.'; });
+  document.querySelector<HTMLMetaElement>('meta[property="og:url"]')!.content = `https://photo-metadata-queue.sociobot.in${path === '/' ? '/' : path}`;
+}
+
+function render(focusHeading = false): void {
+  const path = location.pathname;
+  app.innerHTML = path === '/privacy' ? legalPage('privacy') : path === '/terms' ? legalPage('terms') : path !== '/' && !demoMode ? notFoundPage() : data.items.length ? workspace() : landing();
+  updateRouteMetadata();
   bindCommon();
-  if (path === '/' && data.items.length) bindWorkspace();
+  if ((path === '/' || demoMode) && data.items.length) bindWorkspace();
   else if (path === '/') bindImports();
+  if (focusHeading) {
+    const heading = document.querySelector<HTMLHeadingElement>('h1');
+    heading?.setAttribute('tabindex', '-1');
+    heading?.focus();
+    document.querySelector('#live')!.textContent = document.title;
+  }
+}
+
+async function navigate(path: string, push = true): Promise<void> {
+  const nextDemo = path === '/demo';
+  if (demoMode && !nextDemo) await clearData('demo');
+  if (nextDemo !== demoMode) {
+    demoMode = nextDemo;
+    data = await loadData(storageScope());
+    if (demoMode && !data.items.length) {
+      data = createDemoData();
+      await saveData(data, 'demo');
+      paid = false;
+      licenseNotice = '';
+    } else if (!demoMode) {
+      captureLicense();
+      paid = hasLicense();
+    }
+  }
+  if (push) history.pushState({}, '', path);
+  render(true);
+  window.scrollTo(0, 0);
 }
 
 function bindCommon(): void {
   document.querySelectorAll<HTMLButtonElement>('[data-file-picker]').forEach((button) => button.addEventListener('click', () => document.querySelector<HTMLInputElement>(`#${button.dataset.filePicker}`)?.click()));
-  document.querySelectorAll<HTMLAnchorElement>('[data-nav]').forEach((link) => link.addEventListener('click', (event) => { if (link.origin !== location.origin) return; event.preventDefault(); history.pushState({}, '', link.pathname); render(); window.scrollTo(0, 0); }));
+  document.querySelectorAll<HTMLAnchorElement>('[data-nav]').forEach((link) => link.addEventListener('click', (event) => { if (link.origin !== location.origin) return; event.preventDefault(); void navigate(link.pathname); }));
   document.querySelector('#theme-button')?.addEventListener('click', () => { const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'; document.documentElement.dataset.theme = next; localStorage.setItem('cq-theme', next); });
   document.querySelector('#license-button')?.addEventListener('click', () => (document.querySelector('#license-dialog') as HTMLDialogElement).showModal());
+  document.querySelector('#landing-license-button')?.addEventListener('click', () => (document.querySelector('#license-dialog') as HTMLDialogElement).showModal());
   document.querySelector('#renew-license')?.addEventListener('click', () => (document.querySelector('#license-dialog') as HTMLDialogElement).showModal());
   document.querySelector('.dialog-close')?.addEventListener('click', () => (document.querySelector('#license-dialog') as HTMLDialogElement).close());
   document.querySelector('#remove-license')?.addEventListener('click', () => { removeLicense(); paid = false; render(); });
   document.querySelector('#restore-form')?.addEventListener('submit', async (event) => { event.preventDefault(); const token = (document.querySelector('#license-token') as HTMLInputElement).value; const message = document.querySelector('#license-message')!; saveLicense(token); message.textContent = 'Checking license…'; paid = await verifyLicense(true); if (paid) render(); else message.textContent = 'That license is not active. Check the token and try again.'; });
+  document.querySelector('#reset-demo')?.addEventListener('click', async () => { await clearData('demo'); data = createDemoData(); await saveData(data, 'demo'); render(true); announce('The sample records were reset.'); });
+  document.querySelectorAll<HTMLElement>('[data-start-real]').forEach((button) => button.addEventListener('click', () => { (document.querySelector('#license-dialog') as HTMLDialogElement)?.close(); void navigate('/'); }));
 }
 
 function bindImports(): void {
@@ -204,7 +277,7 @@ async function importPhotos(files: File[]): Promise<void> {
     const item: QueueItem = { id: crypto.randomUUID(), shootId: shoot.id, fileName: file.name, relativePath: (file as File & { webkitRelativePath?: string }).webkitRelativePath || file.name, mimeType: file.type, size: file.size, metadata: emptyMetadata(), ready: false, updatedAt: Date.now() };
     const originalUrl = URL.createObjectURL(file); imageUrls.set(item.id, originalUrl); createThumbnail(file).then((thumb) => { if (thumb) { item.thumbnail = thumb; document.querySelectorAll<HTMLImageElement>(`img[data-preview="${CSS.escape(item.id)}"]`).forEach((image) => { image.src = thumb; }); persist(); } imageUrls.delete(item.id); URL.revokeObjectURL(originalUrl); }); return item;
   });
-  data.shoots.push(shoot); data.items.push(...items); data.activeShootId = shoot.id; data.activeItemId = items[0].id; await persist(); history.pushState({}, '', '/'); render();
+  data.shoots.push(shoot); data.items.push(...items); data.activeShootId = shoot.id; data.activeItemId = items[0].id; await persist(); if (!demoMode) history.pushState({}, '', '/'); render();
 }
 
 async function importCsv(file: File): Promise<void> {
@@ -224,7 +297,7 @@ async function importBackup(file: File): Promise<void> {
     if (!paid && parsed.items.length > 25) { openLicense(); announce('This backup needs Field edition because it contains more than 25 records.'); return; }
     if (!confirm(`Replace this browser's workspace with ${parsed.items.length} imported records? Export a backup first if needed.`)) return;
     data = { shoots: parsed.shoots as Shoot[], items: parsed.items as QueueItem[], activeShootId: parsed.activeShootId, activeItemId: parsed.activeItemId };
-    await persist(); history.pushState({}, '', '/'); render(); announce(`${data.items.length} records restored.`);
+    await persist(); if (!demoMode) history.pushState({}, '', '/'); render(); announce(`${data.items.length} records restored.`);
   } catch (error) { announce(error instanceof Error ? error.message : 'The backup could not be imported.'); }
 }
 
@@ -235,8 +308,19 @@ async function createThumbnail(file: File): Promise<string | undefined> {
 
 function bindWorkspace(): void {
   document.querySelectorAll<HTMLElement>('[data-item]').forEach((button) => button.addEventListener('click', () => { data.activeItemId = button.dataset.item; showQueue = false; persist(); render(); }));
-  document.querySelector('#queue-toggle')?.addEventListener('click', () => { showQueue = true; document.querySelector('.queue-panel')?.classList.add('queue-open'); });
-  document.querySelector('#close-queue')?.addEventListener('click', () => { showQueue = false; document.querySelector('.queue-panel')?.classList.remove('queue-open'); });
+  document.querySelector('#queue-toggle')?.addEventListener('click', () => {
+    showQueue = true;
+    const panel = document.querySelector<HTMLElement>('.queue-panel');
+    panel?.classList.add('queue-open'); panel?.removeAttribute('inert'); panel?.setAttribute('aria-hidden', 'false');
+    document.querySelector('#queue-toggle')?.setAttribute('aria-expanded', 'true');
+    document.querySelector<HTMLButtonElement>('#close-queue')?.focus();
+  });
+  document.querySelector('#close-queue')?.addEventListener('click', () => {
+    showQueue = false;
+    const panel = document.querySelector<HTMLElement>('.queue-panel');
+    panel?.classList.remove('queue-open'); panel?.setAttribute('inert', ''); panel?.setAttribute('aria-hidden', 'true');
+    const toggle = document.querySelector<HTMLButtonElement>('#queue-toggle'); toggle?.setAttribute('aria-expanded', 'false'); toggle?.focus();
+  });
   document.querySelector<HTMLSelectElement>('#shoot-select')?.addEventListener('change', (event) => { data.activeShootId = (event.target as HTMLSelectElement).value; data.activeItemId = data.items.find((item) => item.shootId === data.activeShootId)?.id; persist(); render(); });
   document.querySelector<HTMLSelectElement>('#queue-filter')?.addEventListener('change', (event) => { filter = (event.target as HTMLSelectElement).value as typeof filter; render(); });
   document.querySelector<HTMLInputElement>('#queue-search')?.addEventListener('input', (event) => { query = (event.target as HTMLInputElement).value; render(); requestAnimationFrame(() => { const input = document.querySelector<HTMLInputElement>('#queue-search'); input?.focus(); input?.setSelectionRange(query.length, query.length); }); });
@@ -295,14 +379,14 @@ function newShoot(): void { if (!paid && data.shoots.length >= 1) { openLicense(
 function openLicense(): void { (document.querySelector('#license-dialog') as HTMLDialogElement)?.showModal(); }
 function formatBytes(bytes: number): string { return bytes > 1_048_576 ? `${(bytes / 1_048_576).toFixed(1)} MB` : `${Math.ceil(bytes / 1024)} KB`; }
 
-window.addEventListener('popstate', render);
-window.addEventListener('online', render); window.addEventListener('offline', render);
+window.addEventListener('popstate', () => { void navigate(location.pathname, false); });
+window.addEventListener('online', () => render()); window.addEventListener('offline', () => render());
 window.addEventListener('keydown', (event) => {
   if ((event.metaKey || event.ctrlKey) && event.key === 'Enter' && data.items.length) { event.preventDefault(); markReadyAndMove(); return; }
   const target = event.target as HTMLElement; if (/INPUT|TEXTAREA|SELECT/.test(target.tagName) || document.querySelector('dialog[open]')) return;
   if (event.key.toLowerCase() === 'j') move(1); if (event.key.toLowerCase() === 'k') move(-1);
 });
-document.documentElement.dataset.theme = localStorage.getItem('cq-theme') ?? 'light';
+document.documentElement.dataset.theme = localStorage.getItem('cq-theme') ?? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
 render();
 
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').then((registration) => {
