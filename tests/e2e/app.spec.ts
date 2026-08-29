@@ -284,8 +284,21 @@ test('mobile Back and Forward restore route scroll and focus', async ({ page }) 
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(280);
 });
 
-test('demo uses clear singular and plural review status wording', async ({ page }) => {
+test('reviewed landing and demo copy uses plain photographer terms and correct grammar', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('.lede')).toHaveText('For photographers with large shoots, it turns folders or CSV files into a queue and writes separate XMP metadata files.');
+  await expect(page.getByRole('heading', { name: 'Move one photo at a time' })).toBeVisible();
+  await expect(page.getByText('Start from a photo folder or a CSV file.')).toBeVisible();
+  await expect(page.getByText('Move photo by photo with shared terms and caption tokens.')).toBeVisible();
+  await expect(page.getByText('Review the metadata file and export one .xmp file for each photo.')).toBeVisible();
+  await expect(page.locator('.hero-plate figcaption')).toHaveCount(0);
   await page.goto('/demo');
+  await expect(page.locator('.accession')).toHaveText('Photo 1 of 3');
+  await expect(page.getByText('Required metadata', { exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Required metadata complete' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Reusable terms' })).toBeVisible();
+  await expect(page.getByText('XMP exports', { exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Export this shoot' })).toBeVisible();
   await expect(page.getByText('1 record still needs review.')).toBeVisible();
   await page.locator('#title').fill('Edited ready record');
   await page.getByRole('button', { name: 'Next →' }).click();

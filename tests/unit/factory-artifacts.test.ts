@@ -8,6 +8,8 @@ const root = process.cwd();
 const claims = JSON.parse(readFileSync(resolve(root, '.factory/claims.json'), 'utf8')) as Claim[];
 const claimTests = readFileSync(resolve(root, 'tests/e2e/claims.spec.ts'), 'utf8');
 const html = readFileSync(resolve(root, 'index.html'), 'utf8');
+const readme = readFileSync(resolve(root, 'README.md'), 'utf8');
+const catalogDescription = readFileSync(resolve(root, '.factory/catalog-description.txt'), 'utf8').trim();
 const playwrightConfig = readFileSync(resolve(root, 'playwright.config.ts'), 'utf8');
 
 describe('factory verification artifacts', () => {
@@ -37,5 +39,17 @@ describe('factory verification artifacts', () => {
     expect(html).toContain('property="og:image"');
     expect(html).toContain('name="twitter:card"');
     expect(html).toContain('rel="apple-touch-icon"');
+  });
+
+  it('keeps reviewed README and catalog wording plain and consistent', () => {
+    expect(readme).toContain('It exports valid `.xmp` metadata files without changing photos.');
+    expect(readme).toContain('before sending photos to a library or archive');
+    expect(readme).toContain('the demo uses a separate browser database');
+    expect(readme).toContain("contacts only this site's own servers");
+    for (const removed of ['DAM handoff', 'image folder', 'locally in IndexedDB', 'File System Access API', 'same-origin requests']) {
+      expect(readme).not.toContain(removed);
+    }
+    expect(catalogDescription).toMatch(/^(Caption|Turn|Write|Export|Review|Prepare|Organize|Add)\b/);
+    expect(catalogDescription.length).toBeLessThanOrEqual(120);
   });
 });

@@ -1,32 +1,67 @@
-# Caption Queue — adversarial review 1 handoff
+# Caption Queue — polish round 1 handoff
 
 ## Outcome
 
-**FAIL.** The full review is in [`.factory/review-1.md`](review-1.md). No product code was changed.
+**PASS — repaired, pushed, deployed, and cold-verified.** All 24 findings from `.factory/review-1.md` are closed. No earlier review or polish report existed. The product remains a static offline-first PWA with its botanical field-guide visual system intact.
 
-The live first screen is clear at 390 × 844 and desktop, and the one-click demo is populated, resettable, offline-capable, and isolated from a seeded real workspace. The blocking defect is mobile History API scroll restoration: opening Privacy from the top of `/` and pressing Back returns to `/` at `scrollY=1882` while focus sits on the off-screen h1.
+Implementation commit `469df1d37ae35ff2f487745f0663a1312272ef53` is pushed to `origin/main`. Azure Static Web Apps deployment `ac9bb780-b427-49ee-993f-b985b7d7fc85` succeeded at <https://photo-metadata-queue.sociobot.in/>.
 
-The review also records an incomplete 404 shell, two unlisted live claims, one demo grammar error, and plain-language/terminology findings. Verdict remains FAIL because the work order requires zero findings.
+## What changed
 
-## Verification performed
+- Fixed mobile Back/Forward restoration with manual, per-entry scroll coordinates and focus that does not move the viewport.
+- Added `original-files-unchanged` and `no-generated-captions` claims with real browser tests.
+- Rebuilt the 404 document with the standard shell, metadata, legal links, mobile reflow, focus, and product styling.
+- Rewrote all 20 recorded interface/README terminology and grammar findings in plain photographer language.
+- Preserved direct `/demo` and `?demo=1` entry, separate `demo:caption-queue` storage, reset, discard, and offline behavior.
+- Updated the service-worker cache to `caption-queue-v4`, the copy audit, claims catalog, README, and catalog description.
+- Added regression coverage for history state, 404 structure/accessibility, singular/plural status, reviewed labels, README terminology, and the two safety claims.
+
+The finding-by-finding evidence map is in `.factory/polish-1.md`. Screenshots are in `.factory/evidence-polish-1/`.
+
+## Verification evidence
+
+All clean-clone checks ran from `/tmp/caption-queue-polish-I2NZM9` at commit `469df1d`:
+
+| Check | Result |
+| --- | --- |
+| Install and dependency audit | `npm ci` passed with 60 packages and 0 vulnerabilities. `npm audit --audit-level=high` also passed. |
+| Unit/integration | `npm test` passed 16/16 tests in four files. |
+| Type/build | `npm run typecheck` passed. `npm run build` produced `dist/index.html`. |
+| Full browser/PWA suite | `npm run test:e2e -- --reporter=line` passed 37/37 tests. |
+| Exact claim commands | Every command in `.factory/claims.json` ran separately and passed 19/19; each selected exactly one tagged test. |
+| Accessibility/mobile | Local and live `verify:url` passed two viewports on every app route. Axe found zero serious/critical findings, including on the 390 px 404. Touch targets and 200% text reflow passed. |
+| Privacy/safety | Free demo traffic stayed on the product origin. Original fixture hashes and filenames survived import plus every export path. Empty captions stayed empty with no model request. |
+| Demo/offline | One-click and `?demo=1` entry, three records, separate database, reset, discard, local persistence, offline demo/real reload, and service-worker update passed. |
+| Routing/metadata | Route titles, canonical/OG descriptions, History API focus/scroll, deep links, legal links, and the HTTP 404 shell passed. |
+| Live artifact | `npm run test:live -- https://photo-metadata-queue.sociobot.in/` matched all 20 artifacts and verified headers, caching, manifest MIME, rewrites, and HTTP 404. |
+| Live Lighthouse 12.8.2 | Performance 100, Accessibility 100, Best Practices 100, SEO 100; FCP 1.1 s, LCP 1.4 s, TBT 0 ms, CLS 0. |
+
+Build sizes: JavaScript 46,170 B raw / 15.65 kB gzip; CSS 20,602 B raw / 5.29 kB gzip; mobile hero 32,228 B.
+
+Deployed hashes:
+
+- `dist/index.html`: `6c0c061c2a1ee391dc7d27a658fd2671af4fac998736208c2be54ca4041d7321`
+- `dist/assets/index-BtbOnIRR.js`: `9c3a8410bdf74b30b0d5bfa94255daa98230c3a96c6c1b6c142f706ac90f6bad`
+- `dist/assets/index-CP7PjjS0.css`: `4b659223205c212d56a2d76dde21f9ca29a3fb47bfe5fea0bbb800500f7bba50`
+- `dist/sw.js`: `23cc6343186915bd2d19c399be93011f35754981481c7aefc53a4f85a175ad6b`
+
+## Reproduce
 
 ```sh
 npm ci
 npm test
 npm run typecheck
+npm audit --audit-level=high
 npm run build
 npm run test:e2e -- --reporter=line
+npm run preview
+npm run verify:url -- http://127.0.0.1:4173/
 npm run test:live -- https://photo-metadata-queue.sociobot.in/
 npm run verify:url -- https://photo-metadata-queue.sociobot.in/
 ```
 
-Results: 15 unit tests passed; typecheck and build passed; 32 browser tests passed; all 17 exact `.factory/claims.json` commands passed again from a separate temporary clone; the live build matches all 20 deployment artifacts. Live request logging stayed same-origin during the free demo flow, offline reload retained an edit, all discovered links resolved, and Axe found zero violations on the main routes and 404.
+For claim-by-claim verification, run each exact `test` command in `.factory/claims.json` from a fresh clone.
 
-## Files changed
+## Known gaps and next steps
 
-- `.factory/review-1.md` — complete evidence, sentence counts, findings, claim results, structure checks, and verdict.
-- `.factory/handoff.md` — this review handoff.
-
-## Next steps
-
-Fix F-1-1 through F-1-24, add the missing history/404/claim tests, repeat the full review from a clean clone, and change the verdict only when no findings remain.
+No known product, copy, claim, accessibility, privacy, offline, mobile, routing, metadata, 404, performance, or deployment finding remains. Independent factory re-review is the only next step.
