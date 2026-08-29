@@ -33,7 +33,7 @@ No earlier `.factory/review-*.md` or `.factory/polish-*.md` existed. Every findi
 
 ## Verification
 
-- Fresh clone `/tmp/caption-queue-polish-I2NZM9`: `npm ci`, 16 unit tests, typecheck, build, and 37 browser tests passed.
+- Final fresh clone `/tmp/caption-queue-final-6u3yvN` at evidence commit `5988154`: `npm ci`, 16 unit tests, typecheck, build, and 37 browser tests passed.
 - Every exact `.factory/claims.json` command passed separately: 19/19, each selecting one tagged test.
 - Built JS is 46,170 bytes raw / 15.65 kB gzip; CSS is 20,602 bytes raw / 5.29 kB gzip; mobile hero is 32,228 bytes.
 - Local and live `verify:url` passed at desktop and 390 px. Playwright Axe found no serious or critical issue, including the 404.

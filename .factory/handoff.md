@@ -4,7 +4,7 @@
 
 **PASS — repaired, pushed, deployed, and cold-verified.** All 24 findings from `.factory/review-1.md` are closed. No earlier review or polish report existed. The product remains a static offline-first PWA with its botanical field-guide visual system intact.
 
-Implementation commit `469df1d37ae35ff2f487745f0663a1312272ef53` is pushed to `origin/main`. Azure Static Web Apps deployment `ac9bb780-b427-49ee-993f-b985b7d7fc85` succeeded at <https://photo-metadata-queue.sociobot.in/>.
+Implementation commit `469df1d37ae35ff2f487745f0663a1312272ef53` and evidence commit `59881542ea8e52339c061a297d83520f15d98501` are pushed to `origin/main`. Azure Static Web Apps deployment `ac9bb780-b427-49ee-993f-b985b7d7fc85` succeeded at <https://photo-metadata-queue.sociobot.in/>.
 
 ## What changed
 
@@ -20,7 +20,7 @@ The finding-by-finding evidence map is in `.factory/polish-1.md`. Screenshots ar
 
 ## Verification evidence
 
-All clean-clone checks ran from `/tmp/caption-queue-polish-I2NZM9` at commit `469df1d`:
+Final clean-clone checks ran from `/tmp/caption-queue-final-6u3yvN` at evidence commit `5988154`:
 
 | Check | Result |
 | --- | --- |
