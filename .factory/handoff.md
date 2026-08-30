@@ -1,30 +1,26 @@
-# Caption Queue — polish round 2 handoff
+# Caption Queue — verification 13 handoff
 
 ## Outcome
 
-**PASS — no review finding remains.** Candidate `a8ee7befd517bc9123d5b18d0cc6f937b4888694` was repaired against review commit `f47cec09f436950b558d3423e900c9b0b273c900`. The implementation commit is `f50d5ef68312c9e60486992db21af7d39e4f68d1`.
+**FAIL — release provenance is blocked.** The requested candidate `98b01d0d50cb144d87e008865bd13a967205814f` is absent from the supplied clone and the configured GitHub origin rejects an exact-object fetch with `not our ref`. It therefore cannot be tested or matched to the live site.
 
-Round 2 adds a real `free-core-exports` claim and clean unlicensed-workspace browser test for XMP, CSV, and JSON backup export. It also replaces the demo's unexplained IPTC helper with “Creator, copyright, and location fields.” Every finding from reviews 1 and 2 is mapped in `.factory/polish-2.md`.
+The available `main` commit, `98b01d85bea536ad9cf8ae98258a82c2418ec546`, passes all product checks, and its production build byte-matches all 20 deployed artifacts at <https://photo-metadata-queue.sociobot.in/>. This does not establish the identity of the requested candidate.
 
-## Deployment
+Full evidence and the sole release-blocking finding are in [`.factory/verification-13.md`](verification-13.md).
 
-- Live URL: <https://photo-metadata-queue.sociobot.in/>
-- Static deployment ID: `13a79133-8be7-4a80-9950-e39e8ef4d599`
-- `npm run test:live -- https://photo-metadata-queue.sociobot.in/` matched all 20 deployed artifacts to `dist/` and passed headers, SPA rewrites, and HTTP 404 checks.
-- Live hashes: `index.html` `917f1bc0…70e01`; `sw.js` `23cc6343…ad6b`; JS `e5b56482…a7a6`; CSS `0978c6d4…812d`.
+## What was verified
 
-## Verification
-
-- Fresh clone `/tmp/cq-polish2-clean-mSWcB0/repo`: `npm ci` completed with 0 vulnerabilities; all 20 exact commands from `.factory/claims.json` passed independently.
-- `npm test`: 16/16 passed.
-- `npm run typecheck`: passed.
-- `npm run build`: passed; JS 46,265 bytes raw / 15.62 kB gzip; CSS 20,742 bytes raw / 5.32 kB gzip; mobile hero 32,228 bytes.
-- `npm run test:e2e -- --reporter=list`: 38/38 passed. This includes keyboard, mobile touch targets, 200% text reflow, History API focus/scroll, Axe, privacy requests, demo isolation, offline reload, and service-worker update tests.
-- `npm audit --audit-level=high`: 0 vulnerabilities.
-- Local and live `npm run verify:url`: passed desktop semantics and 390 px layout.
-- `npm run test:polish-live -- https://photo-metadata-queue.sociobot.in`: passed cold landing, one-click demo, reset, unlicensed exports, route titles, mobile Back/Forward focus and scroll, legal routes, 404, Axe, privacy request origins, and offline persistence/status.
-- Live Lighthouse 12.8.2: Performance 100, Accessibility 100, Best Practices 100, SEO 100; FCP 1.1 s, LCP 1.4 s, TBT 0 ms, CLS 0. Full report: `.factory/evidence-polish-2/lighthouse-live.json`.
-- Live screenshots: `.factory/evidence-polish-2/live-cold-desktop.png`, `live-cold-mobile.png`, `live-demo-mobile.png`, `live-demo-offline-mobile.png`, and `live-404-mobile.png`.
+- All 20 exact commands in `.factory/claims.json`: passed individually.
+- Cold first-read and one-click sample demo gates: passed live at desktop and 390 px.
+- `npm ci`, 16 unit/integration tests, type check, optional lint, dependency audit, exact production build: passed.
+- Full Playwright/PWA suite: 38/38 passed.
+- Live artifact/header/route verifier and live workflow verifier: passed.
+- Normal, invalid, boundary, and recovery paths: passed on the available build.
+- Same-origin free workflow, browser response headers, cache policy, checkout redirect, and live license request shape: passed.
+- License API rate limiting: 30 accepted requests per window; request 31 returned 429 with `Retry-After: 3`.
+- Keyboard/focus, mobile touch targets, 200% text reflow, reduced motion, and Axe serious/critical checks: passed.
+- Live offline reload and local service-worker update: passed.
+- Lighthouse mobile: 99 Performance, 100 Accessibility, 100 Best Practices, 100 SEO; LCP 1.59 s, TBT 50 ms, CLS 0.
 
 ## Run and verify
 
@@ -33,11 +29,13 @@ npm ci
 npm test
 npm run typecheck
 npm run build
-npm run test:e2e
+npm run test:e2e -- --reporter=list
 npm run verify:url -- http://127.0.0.1:4173/
+npm run verify:url -- https://photo-metadata-queue.sociobot.in/
+npm run test:live -- https://photo-metadata-queue.sociobot.in/
 npm run test:polish-live -- https://photo-metadata-queue.sociobot.in
 ```
 
-## Known gaps and next steps
+## Required next step
 
-None. No blocking, high, medium, or minor review item is deferred.
+Push the intended candidate or correct the SHA, deploy that exact commit, and rerun independent verification. If `98b01d85bea536ad9cf8ae98258a82c2418ec546` was intended, send a corrected work order; no product defect was found in that build.
