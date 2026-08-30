@@ -40,6 +40,8 @@ npm run verify:url -- http://127.0.0.1:4173/
 
 `npm run build` is the factory work-order build command. It creates the static deployment at `dist/`, with `dist/index.html` at its root. Browser tests use Playwright 1.58.2 and the preinstalled Chromium build.
 
+Every production build writes `dist/release.json` with its Git commit. After pushing and deploying `main`, run `npm run test:live -- https://photo-metadata-queue.sociobot.in/`. The command fails if the live marker, local source, and `origin/main` disagree.
+
 ## Privacy and data ownership
 
 There are no analytics, trackers, third-party fonts, or third-party runtime scripts. The free metadata workflow contacts only this site's own servers. Only a pasted paid-license token is sent to the Sociobot licensing endpoint for verification. See `/privacy` and `/terms` in the app for the full policies.

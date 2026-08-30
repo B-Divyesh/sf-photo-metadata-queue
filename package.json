@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0",
-    "build": "tsc --noEmit && vite build",
+    "build": "tsc --noEmit && vite build && node scripts/write-release.mjs",
     "typecheck": "tsc --noEmit",
     "preview": "vite preview --host 0.0.0.0",
     "test": "vitest run",
@@ -13,6 +13,7 @@
     "test:claims": "playwright test --grep @claim:",
     "test:live": "node tests/release/verify-live.mjs",
     "test:polish-live": "node tests/release/verify-polish-2.mjs",
+    "verify:release": "node scripts/verify-release-provenance.mjs",
     "verify:url": "./verify-url.sh"
   },
   "devDependencies": {

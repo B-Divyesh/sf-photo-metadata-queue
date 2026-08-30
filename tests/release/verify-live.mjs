@@ -1,9 +1,30 @@
 import assert from 'node:assert/strict';
+import { execFileSync } from 'node:child_process';
 import { readdir, readFile } from 'node:fs/promises';
 import { join, relative, resolve } from 'node:path';
 
 const base = new URL(process.argv[2] ?? 'https://photo-metadata-queue.sociobot.in/');
 const dist = resolve(process.cwd(), 'dist');
+const shaPattern = /^[0-9a-f]{40}$/;
+
+function git(...args) {
+  return execFileSync('git', args, { cwd: process.cwd(), encoding: 'utf8' }).trim();
+}
+
+function parseRelease(value, label) {
+  const parsed = JSON.parse(value);
+  assert.equal(parsed.schema, 1, `${label} must use release schema 1`);
+  assert.equal(typeof parsed.commit, 'string', `${label} must include a commit`);
+  assert.match(parsed.commit, shaPattern, `${label} must contain a full lowercase Git SHA`);
+  return parsed.commit;
+}
+
+const sourceCommit = git('rev-parse', 'HEAD').toLowerCase();
+assert.match(sourceCommit, shaPattern, 'The local source must be a full Git commit SHA');
+const publishedMain = git('ls-remote', 'origin', 'refs/heads/main').split(/\s+/)[0];
+assert.equal(publishedMain, sourceCommit, 'origin/main must be the source commit before live release verification');
+const localRelease = parseRelease(await readFile(join(dist, 'release.json'), 'utf8'), 'dist/release.json');
+assert.equal(localRelease, sourceCommit, 'dist/release.json must identify the source commit that built it');
 
 async function filesBelow(directory) {
   const entries = await readdir(directory, { withFileTypes: true });
@@ -38,6 +59,10 @@ for (const feature of ['camera=()', 'geolocation=()', 'microphone=()', 'payment=
 }
 assert.match(htmlResponse.headers.get('cache-control') ?? '', /no-(?:cache|store)/, 'HTML must not be immutable');
 
+const liveReleaseResponse = await get('/release.json');
+const liveRelease = parseRelease(await liveReleaseResponse.text(), `${base.origin}/release.json`);
+assert.equal(liveRelease, sourceCommit, 'The live release marker does not identify this source commit');
+
 const localFiles = (await filesBelow(dist)).filter((path) => !path.endsWith('staticwebapp.config.json'));
 for (const localPath of localFiles) {
   const path = `/${relative(dist, localPath).replaceAll('\\', '/')}`;
@@ -71,4 +96,4 @@ for (const expected of ['<h1>Page not found</h1>', 'name="description"', 'rel="c
   assert.ok(missingHtml.includes(expected), `404 shell is missing ${expected}`);
 }
 
-console.log(`Live release verified: ${localFiles.length} artifacts match, response policies, SPA routes, and the 404 response pass at ${base.origin}`);
+console.log(`Live release verified: ${sourceCommit}; ${localFiles.length} artifacts match, response policies, SPA routes, and the 404 response pass at ${base.origin}`);

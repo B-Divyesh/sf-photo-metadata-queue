@@ -1,41 +1,44 @@
-# Caption Queue — verification 13 handoff
+# Caption Queue — repair 11 handoff
 
 ## Outcome
 
-**FAIL — release provenance is blocked.** The requested candidate `98b01d0d50cb144d87e008865bd13a967205814f` is absent from the supplied clone and the configured GitHub origin rejects an exact-object fetch with `not our ref`. It therefore cannot be tested or matched to the live site.
+**Repaired the verification-13 release-provenance blocker.** The report found no product defect. Its only blocker was that the requested SHA did not exist on `origin`, even though a different build matched the live PWA.
 
-The available `main` commit, `98b01d85bea536ad9cf8ae98258a82c2418ec546`, passes all product checks, and its production build byte-matches all 20 deployed artifacts at <https://photo-metadata-queue.sociobot.in/>. This does not establish the identity of the requested candidate.
+Every production build now emits `dist/release.json`. It contains the full Git commit SHA of the source that produced the artifact. Live verification requires three equal values: that marker, the checked-out source, and `origin/main`. A release cannot pass artifact parity while identifying a missing or different candidate.
 
-Full evidence and the sole release-blocking finding are in [`.factory/verification-13.md`](verification-13.md).
+## Repair details
 
-## What was verified
+- Added deterministic build provenance with schema version `1` and a full 40-character Git SHA.
+- Added `npm run verify:release` for local marker/source validation.
+- Strengthened `npm run test:live` to require a published `main` SHA and the live `/release.json` marker before comparing every deployed artifact.
+- Added regression coverage that writes, validates, and rejects mismatched release markers.
+- Documented the post-deploy identity check in the README.
 
-- All 20 exact commands in `.factory/claims.json`: passed individually.
-- Cold first-read and one-click sample demo gates: passed live at desktop and 390 px.
-- `npm ci`, 16 unit/integration tests, type check, optional lint, dependency audit, exact production build: passed.
-- Full Playwright/PWA suite: 38/38 passed.
-- Live artifact/header/route verifier and live workflow verifier: passed.
-- Normal, invalid, boundary, and recovery paths: passed on the available build.
-- Same-origin free workflow, browser response headers, cache policy, checkout redirect, and live license request shape: passed.
-- License API rate limiting: 30 accepted requests per window; request 31 returned 429 with `Retry-After: 3`.
-- Keyboard/focus, mobile touch targets, 200% text reflow, reduced motion, and Axe serious/critical checks: passed.
-- Live offline reload and local service-worker update: passed.
-- Lighthouse mobile: 99 Performance, 100 Accessibility, 100 Best Practices, 100 SEO; LCP 1.59 s, TBT 50 ms, CLS 0.
+## Verification
 
-## Run and verify
+- Clean install: `npm ci` — 60 packages installed; `npm audit --audit-level=high` reported 0 vulnerabilities.
+- Unit/integration: `npm test` — 18/18 passed across 5 files, including two provenance regression tests.
+- Type/lint: `npm run typecheck` passed; `npm run lint --if-present` completed (no lint script is configured).
+- Production build: `npm run build` passed and produced `dist/` with `release.json`.
+- Local provenance: `npm run verify:release` passed.
+- Browser/PWA: `npm run test:e2e -- --reporter=list` — 38/38 passed, covering desktop/mobile, keyboard, Axe, offline reload, and worker update.
+- Mandatory claims: all 20 exact commands from `.factory/claims.json` passed separately after the clean install.
+
+## Deploy and prove the release
 
 ```sh
 npm ci
 npm test
 npm run typecheck
 npm run build
-npm run test:e2e -- --reporter=list
-npm run verify:url -- http://127.0.0.1:4173/
-npm run verify:url -- https://photo-metadata-queue.sociobot.in/
+git push origin main
+# Deploy dist/ to the production static app.
 npm run test:live -- https://photo-metadata-queue.sociobot.in/
 npm run test:polish-live -- https://photo-metadata-queue.sociobot.in
 ```
 
-## Required next step
+`test:live` is the identity proof. It fails unless the live static artifact, source checkout, and public `main` reference identify the same commit.
 
-Push the intended candidate or correct the SHA, deploy that exact commit, and rerun independent verification. If `98b01d85bea536ad9cf8ae98258a82c2418ec546` was intended, send a corrected work order; no product defect was found in that build.
+## Known gaps and next steps
+
+The original SHA `98b01d0d50cb144d87e008865bd13a967205814f` cannot be repaired because it was never available from the remote. This repair creates and publishes a new, independently verifiable candidate. The remaining final step is deployment and the live identity check recorded above.
