@@ -8,7 +8,7 @@ One-click sample: <https://photo-metadata-queue.sociobot.in/demo>
 
 ## Who it is for
 
-Photographers, editors, and archive teams who review metadata before sending photos to a library or archive. The free edition accepts 25 records per shoot. The optional $24 Field edition is a one-time license. It removes the import limit, adds saved shoots, and enables batch edit patterns. `.xmp` writing, backups, accessibility, and privacy remain free.
+Photographers, editors, and archive teams who review metadata before sending photos to a library or archive. The free edition accepts 25 records per shoot. The optional $24 Field edition is a one-time license. It removes the import limit, adds saved shoots, and enables batch edit patterns. XMP, metadata CSV, and workspace backup exports remain free.
 
 ## Capabilities
 

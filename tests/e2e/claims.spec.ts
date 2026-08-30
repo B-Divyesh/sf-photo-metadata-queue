@@ -215,6 +215,47 @@ test('@claim:bulk-xmp export this shoot downloads one .xmp file per sample recor
   await expect.poll(() => downloads.slice().sort()).toEqual(['BIRDS_1842.xmp', 'BIRDS_1843.xmp', 'BIRDS_1844.xmp']);
 });
 
+test('@claim:free-core-exports an unlicensed real workspace exports XMP, metadata CSV, and a JSON backup', async ({ page }) => {
+  await openFreshDemo(page);
+  await page.getByRole('button', { name: 'Start for real' }).click();
+  await expect(page.evaluate(() => localStorage.getItem('sb_license:photo-metadata-queue'))).resolves.toBeNull();
+  await expect(page.getByRole('button', { name: 'View pricing' })).toBeVisible();
+
+  await page.locator('#csv-input').setInputFiles({ name: 'free-export.csv', mimeType: 'text/csv', buffer: Buffer.from(manifestCsv(2)) });
+  await expect(page.getByRole('heading', { name: 'free-export', level: 1 })).toBeVisible();
+  await page.evaluate(() => {
+    const writes: Record<string, string> = {};
+    (window as typeof window & { freeSidecarWrites: Record<string, string> }).freeSidecarWrites = writes;
+    window.showDirectoryPicker = async () => ({
+      getFileHandle: async (name: string) => ({
+        createWritable: async () => ({
+          write: async (content: string) => { writes[name] = content; },
+          close: async () => undefined
+        })
+      })
+    }) as unknown as FileSystemDirectoryHandle;
+  });
+
+  await page.getByRole('button', { name: 'Export 2 .xmp files' }).click();
+  await expect.poll(() => page.evaluate(() => (window as typeof window & { freeSidecarWrites: Record<string, string> }).freeSidecarWrites))
+    .toMatchObject({
+      'FRAME_001.xmp': expect.stringContaining('<x:xmpmeta'),
+      'FRAME_002.xmp': expect.stringContaining('<x:xmpmeta')
+    });
+
+  const csv = await downloadText(page, () => page.getByRole('button', { name: 'Export metadata CSV' }).click());
+  expect(csv.name).toBe('free-export-metadata.csv');
+  expect(csv.text.trim().split('\n')).toHaveLength(3);
+  expect(csv.text).toContain('FRAME_001.jpg');
+
+  const backup = await downloadText(page, () => page.getByRole('button', { name: 'Export workspace backup' }).click());
+  expect(backup.name).toBe('caption-queue-free-export.json');
+  const restored = JSON.parse(backup.text) as { version: number; items: Array<{ fileName: string }> };
+  expect(restored.version).toBe(1);
+  expect(restored.items.map((item) => item.fileName)).toEqual(['FRAME_001.jpg', 'FRAME_002.jpg']);
+  expect(await page.evaluate(() => localStorage.getItem('sb_license:photo-metadata-queue'))).toBeNull();
+});
+
 test('@claim:free-limit free mode accepts 25 records and rejects 26', async ({ page }) => {
   await openFreshDemo(page);
   await page.getByRole('button', { name: 'Start for real' }).click();

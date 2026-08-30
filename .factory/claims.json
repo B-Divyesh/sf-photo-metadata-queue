@@ -63,6 +63,13 @@
     "sandbox": "fresh Chromium context at /demo without File System Access; write the sample set; assert three separate named XMP downloads"
   },
   {
+    "id": "free-core-exports",
+    "claim": "XMP, metadata CSV, and workspace backup exports remain available without a Field edition license.",
+    "where": "landing pricing section, license dialog, README",
+    "test": "npm run test:e2e -- --grep @claim:free-core-exports",
+    "sandbox": "fresh Chromium context entered through /demo; start a real workspace without a license; import two records; assert valid XMP, CSV, and JSON backup output"
+  },
+  {
     "id": "free-limit",
     "claim": "The free edition accepts 25 records per shoot and stops a 26-record import.",
     "where": "landing facts, pricing, license dialog, README",

@@ -1,6 +1,6 @@
 # Copy audit
 
-Audited 2026-08-29 after adversarial review 1. Counts treat numbers, abbreviations, paths, and hyphenated terms as one word. Every landing-page line is at most 22 words. No line uses a banned marketing word.
+Audited 2026-08-30 after adversarial review 2. Counts treat numbers, abbreviations, paths, and hyphenated terms as one word. Every landing-page line is at most 22 words. No line uses a banned marketing word.
 
 ## Landing page
 
@@ -39,14 +39,16 @@ Audited 2026-08-29 after adversarial review 1. Counts treat numbers, abbreviatio
 | Use the free queue or remove its limit | 8 | Pass |
 | $24 once | 2 | Pass; `field-edition` claim |
 | Field edition removes the 25-record import limit, adds saved shoots, and enables batch edit patterns. | 15 | Pass; `field-edition` claim |
-| Core XMP and data exports remain free. | 7 | Pass |
+| XMP, metadata CSV, and workspace backup exports remain free. | 9 | Pass; `free-core-exports` claim |
 | View Field edition | 3 | Pass |
 | Photo metadata stays on this device during the free workflow. | 10 | Pass; `local-privacy` claim |
 | Caption Queue v1.0.0 · Built by Param Factory · Field-desk image generated for this product. | 15 | Pass |
 
 ## README review findings
 
-The introduction now defines `.xmp` metadata files before using the shorter `.xmp` file term. The audience text names a photo library or archive instead of “DAM.” User-facing capabilities say “browser database” and “this browser” instead of exposing IndexedDB. Folder writing is described by its result, and the privacy sentence says the workflow contacts only this site's servers. The deployment routing and 404 behavior are now two sentences; neither exceeds 22 words.
+The introduction defines `.xmp` metadata files before using the shorter `.xmp` file term. The audience text names a photo library or archive instead of “DAM.” User-facing capabilities say “browser database” and “this browser” instead of exposing IndexedDB. Folder writing is described by its result, and the privacy sentence says the workflow contacts only this site's servers. The free-export sentence names the three tested export types. The deployment routing and 404 behavior are two sentences; neither exceeds 22 words.
+
+The demo helper “Creator, copyright, and location fields.” has five words. It names the visible fields without the unexplained “IPTC” acronym.
 
 ## Terminology
 

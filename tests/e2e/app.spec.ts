@@ -308,6 +308,8 @@ test('reviewed landing and demo copy uses plain photographer terms and correct g
   await expect(page.getByRole('heading', { name: 'Reusable terms' })).toBeVisible();
   await expect(page.getByText('XMP exports', { exact: true })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Export this shoot' })).toBeVisible();
+  await expect(page.getByText('Creator, copyright, and location fields.')).toBeVisible();
+  await expect(page.getByText('Portable IPTC ownership and place fields.')).toHaveCount(0);
   await expect(page.getByText('1 record still needs review.')).toBeVisible();
   await page.locator('#title').fill('Edited ready record');
   await page.getByRole('button', { name: 'Next →' }).click();
