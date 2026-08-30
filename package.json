@@ -12,6 +12,7 @@
     "test:e2e": "playwright test",
     "test:claims": "playwright test --grep @claim:",
     "test:live": "node tests/release/verify-live.mjs",
+    "test:polish-live": "node tests/release/verify-polish-2.mjs",
     "verify:url": "./verify-url.sh"
   },
   "devDependencies": {
