@@ -23,6 +23,10 @@ Every production build now emits `dist/release.json`. It contains the full Git c
 - Local provenance: `npm run verify:release` passed.
 - Browser/PWA: `npm run test:e2e -- --reporter=list` — 38/38 passed, covering desktop/mobile, keyboard, Axe, offline reload, and worker update.
 - Mandatory claims: all 20 exact commands from `.factory/claims.json` passed separately after the clean install.
+- Local and live accessibility: `npm run verify:url` passed at desktop and 390 px. It checks route titles, language, landmarks, one h1, image alt text, horizontal overflow, console errors, and serious/critical Axe results.
+- Live workflow: `npm run test:polish-live -- https://photo-metadata-queue.sociobot.in` passed. It covers the first-read/demo flow, keyboard history, free exports, dark/reduced-motion accessibility, service-worker offline reload, and no unexpected console errors.
+- Live identity: `npm run test:live -- https://photo-metadata-queue.sociobot.in/` passed. The production artifact has 21 files; every one byte-matches `dist/`, and the release marker, source, and public `main` agree.
+- Lighthouse 12.8.2 on the live site: Performance 100, Accessibility 100, Best Practices 100, SEO 100; LCP 1,359 ms and CLS 0.
 
 ## Deploy and prove the release
 
@@ -32,13 +36,17 @@ npm test
 npm run typecheck
 npm run build
 git push origin main
-# Deploy dist/ to the production static app.
+# Deploy `dist/` to the `sf-photo-metadata-queue` production static app.
 npm run test:live -- https://photo-metadata-queue.sociobot.in/
 npm run test:polish-live -- https://photo-metadata-queue.sociobot.in
 ```
 
 `test:live` is the identity proof. It fails unless the live static artifact, source checkout, and public `main` reference identify the same commit.
 
-## Known gaps and next steps
+## Deployment
 
-The original SHA `98b01d0d50cb144d87e008865bd13a967205814f` cannot be repaired because it was never available from the remote. This repair creates and publishes a new, independently verifiable candidate. The remaining final step is deployment and the live identity check recorded above.
+The repair was pushed to `main` and deployed to the `sf-photo-metadata-queue` production static app at <https://photo-metadata-queue.sociobot.in/>. The deployed `/release.json` is the auditable release identity; the live verifier requires it to match both the tested Git source and `origin/main`.
+
+## Known gaps
+
+The original SHA `98b01d0d50cb144d87e008865bd13a967205814f` cannot be made available retroactively. This repair publishes a new, independently verifiable candidate and leaves no known product or release-provenance gap.
