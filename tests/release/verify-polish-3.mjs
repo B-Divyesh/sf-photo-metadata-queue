@@ -100,6 +100,7 @@ try {
       'LIVE_002.jpg,Live two,,Alias description,bird; dusk,,Nora Singh,© Nora Singh,Picton,Ontario,Canada,2026-08-22'
     ].join('\n'))
   });
+  await free.page.getByRole('heading', { name: 'complete-schema', level: 1 }).waitFor();
   assert.equal(await free.page.locator('.notice-toast').count(), 0);
   assert.equal(await free.page.locator('#description').inputValue(), 'First record');
   assert.equal(await free.page.locator('#creator').inputValue(), 'Mira Shah');

@@ -38,7 +38,7 @@ npm run test:polish-live -- https://photo-metadata-queue.sociobot.in
 
 The live artifact parity, headers, known routes, designed HTTP 404, cold first screen, isolated demo/reset, CSV schema, all tokens, payment copy, history focus/scroll, offline reload, same-origin traffic, and serious/critical Axe checks passed. Screenshots and the Lighthouse JSON are in `.factory/evidence-polish-3/`.
 
-Lighthouse mobile: Performance 100, Accessibility 100, Best Practices 100, SEO 100; FCP 1.2 s, LCP 1.5 s, TBT 0 ms, CLS 0. Production JS is 46.31 kB raw / 15.63 kB gzip; main CSS is 20.74 kB raw / 5.32 kB gzip.
+Lighthouse mobile: Performance 100, Accessibility 100, Best Practices 100, SEO 100; FCP 1.1 s, LCP 1.4 s, TBT 0 ms, CLS 0. Production JS is 46.31 kB raw / 15.63 kB gzip; main CSS is 20.74 kB raw / 5.32 kB gzip.
 
 ## Run and deploy
 

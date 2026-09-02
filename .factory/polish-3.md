@@ -43,7 +43,7 @@ Candidate `4b6bd5c24abb730785f23f292c37be10ebb62096` was repaired against review
 - `npm test` passed 19 tests, `npm run typecheck` passed, `npm run build` produced `dist/`, and all 40 Playwright tests passed.
 - Playwright Axe found no serious or critical violations across the landing, editor, dark theme, legal routes, and 404. Keyboard, focus, 44 px targets, 200% text, reduced motion, privacy traffic, offline reload, and PWA update behavior passed.
 - Production JS is 46.31 kB raw / 15.63 kB gzip. Main CSS is 20.74 kB raw / 5.32 kB gzip. The mobile hero is 32.23 kB.
-- Live Lighthouse 12.8.2 scored 100 Performance, 100 Accessibility, 100 Best Practices, and 100 SEO; FCP 1.2 s, LCP 1.5 s, TBT 0 ms, CLS 0.
+- Live Lighthouse 12.8.2 scored 100 Performance, 100 Accessibility, 100 Best Practices, and 100 SEO; FCP 1.1 s, LCP 1.4 s, TBT 0 ms, CLS 0.
 - `test:live`, `verify:url`, and `test:polish-live` passed against <https://photo-metadata-queue.sociobot.in/> after the final deployment.
 
 All 30 cumulative findings are closed. No severity is deferred.
