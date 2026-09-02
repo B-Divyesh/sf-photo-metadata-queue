@@ -1,48 +1,32 @@
-# Caption Queue — polish round 4 handoff
+# Caption Queue — independent verification 16 handoff
 
 ## Outcome
 
-**PASS.** All 31 cumulative findings from reviews 1–4 are closed. The round-four blocking defect is fixed: the **Caption Queue** wordmark on `/demo` now routes home through the existing safe demo-exit transition.
+**PASS** for candidate `fa6306f62029c4c257eef44ca2d2c0b43118f46a` at <https://photo-metadata-queue.sociobot.in/>. The live release marker and all 21 deployed artifacts match the fresh production build. No product source was modified during verification.
 
-That transition waits for `demo:caption-queue` deletion, retains `caption-queue`, renders `/`, focuses the landing h1 when the real workspace is empty, and announces the route through the existing live region. The functional repair is commit `e334a3a0e7d9bc0af471999beba2fba878206cdc`.
+## What was verified
 
-## What changed
+- All 21 exact demo-claim commands in `.factory/claims.json` passed separately after `npm ci`; the combined claim selection passed too.
+- `npm test` passed (19 tests), `npm run typecheck` passed, `npm run build` produced `dist/`, and `npm run test:e2e` passed (41/41).
+- Live URL, artifact, header/cache, CSP, manifest, worker, route, designed-404, console, Axe serious/critical, desktop, 390 px, keyboard-focus, offline reload, worker update, and demo-isolation checks passed.
+- The cold landing plainly explains the local metadata queue, its photographer audience, and the first action. The visible one-click sample opens an isolated three-record queue.
+- Free-workflow requests remained same-origin. The licensing endpoint accepted 30 invalid requests from one client, then returned `429` with `Retry-After: 3` on request 31.
 
-- Set the shared wordmark destination to `/` on every route, including `/demo`.
-- Added `demo wordmark exits safely to home, focuses its heading, and deletes only demo data`. It edits the demo, seeds a sentinel in the real database, clicks the wordmark, checks `/`, checks landing-h1 focus, checks demo deletion, and reads the unchanged real sentinel.
-- Added a production round-four verifier that repeats the same storage and focus assertions against the live site.
-- Updated the catalog description to a verb-first, 87-character sentence.
-- Re-audited the copy, demo documentation, claims register, all earlier findings, visual identity, and generated-asset provenance. No new product claim or runtime dependency was introduced.
+Detailed evidence, the claim list, headers, testing commands, and zero-defect severity table are in [`.factory/verification-16.md`](verification-16.md).
 
-The complete finding-to-evidence matrix is in `.factory/polish-4.md`.
-
-## Verification
-
-- Clean clone of pushed `origin/main`: `npm ci` completed with zero vulnerabilities. Every one of the 21 exact commands in `.factory/claims.json` passed separately and selected one tagged browser test.
-- `npm test`: 19/19 tests passed.
-- `npm run typecheck`: passed.
-- `npm run build`: produced `dist/index.html`; JavaScript is 46.29 kB raw / 15.62 kB gzip and CSS is 20.74 kB raw / 5.32 kB gzip.
-- `npm run test:e2e -- --reporter=line`: 41/41 tests passed.
-- `npm run verify:url -- https://photo-metadata-queue.sociobot.in/`: passed desktop semantics, 390 px layout, route structure, console, and serious/critical Axe checks.
-- `npm run test:polish-live -- https://photo-metadata-queue.sociobot.in`: passed the cumulative live workflow plus the wordmark storage-isolation regression.
-- `npm run test:live -- https://photo-metadata-queue.sociobot.in/`: matched 21 deployment artifacts and verified headers, cache policy, SPA routes, and the real HTTP 404.
-- Lighthouse 12.8.2 on the live landing page: Performance 100, Accessibility 100, Best Practices 100, SEO 100; FCP 1.1 s, LCP 1.5 s, TBT 0 ms, CLS 0.
-- Visual inspection passed for the cold mobile landing, direct demo, reset state, wordmark exit, desktop landing, pricing, offline demo, CSV schema, and styled 404. Evidence is under `.factory/evidence-polish-4/`.
-
-## Deploy and verify
+## How to verify
 
 ```sh
 npm ci
 npm test
 npm run typecheck
 npm run build
-npm run test:e2e -- --reporter=line
-/opt/fleet/lib/deploy-static.sh photo-metadata-queue dist
-npm run test:live -- https://photo-metadata-queue.sociobot.in/
-npm run verify:url -- https://photo-metadata-queue.sociobot.in/
-npm run test:polish-live -- https://photo-metadata-queue.sociobot.in
+npm run test:e2e
+npm run verify:url -- https://photo-metadata-queue.sociobot.in
+npm run test:live
+npm run test:polish-live
 ```
 
-## Known gaps and next steps
+## Known gap / next step
 
-None. No finding of any severity is deferred. Infrastructure, shared services, billing configuration, and other products were not accessed or changed.
+The unclaimed pilot success metric in the brief still needs validation with photographers completing a 100-image shoot. No release-blocking defect is open.
