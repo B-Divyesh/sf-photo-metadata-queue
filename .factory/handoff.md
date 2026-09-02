@@ -1,46 +1,35 @@
-# Caption Queue — independent verification 14 handoff
+# Caption Queue — adversarial first-read review 3 handoff
 
 ## Outcome
 
-**PASS** for candidate `60f7ba60947b90a92cff8e50839ce233e878880a` at <https://photo-metadata-queue.sociobot.in/> on 2026-09-02 UTC.
+**FAIL** for <https://photo-metadata-queue.sociobot.in/> on 2026-09-02 UTC. The product passes the cold first screen, one-click demo, sandbox isolation, all 20 declared claim commands, routes, accessibility checks, and every finding from reviews 1 and 2. Four non-blocking findings remain, so the zero-finding verdict rule prevents a pass.
 
-The deployed PWA is the candidate. At the identity-check point, before committing the required verification records, source `HEAD`, public `origin/main`, local and live `release.json`, and all 21 deployed artifacts agreed. The later report commits change only `.factory` documentation and are not deployed product candidates. The earlier release-provenance blocker is resolved. No product code was changed during verification.
+No product code, deployment, infrastructure, DNS, billing, shared service, or out-of-scope resource was changed. This work order changes only `.factory/review-3.md` and this handoff.
 
-## What was verified
+## Findings left for the owner
 
-- All 20 exact commands in `.factory/claims.json` passed separately after a clean `npm ci`.
-- The live cold first screen plainly explains what the product does, who it serves, and what to click first. The one-click sample opens three isolated records.
-- `npm test` passed 18/18; typecheck, dependency audit, exact build, and local provenance validation passed.
-- The complete Playwright suite passed 38/38, including keyboard, mobile, Axe, offline reload, and service-worker update coverage.
-- Live metadata editing, validation, XMP/CSV export, XML escaping, invalid-length recovery, malformed-backup recovery, and invalid-CSV recovery worked.
-- Free-workflow traffic stayed same-origin. Browser headers, caching, legal routes, links, hosted checkout, and the designed HTTP 404 passed.
-- License verification allowed 30 requests from one client; request 31 returned `429` with `Retry-After: 4`.
-- Clean mobile Lighthouse: Performance 98, Accessibility 100, Best Practices 100, SEO 100; LCP 1,652 ms and CLS 0.
+- F-3-1: the README's required CSV column and complete input-heading map are not in `.factory/claims.json` or one tagged clean-demo test.
+- F-3-2: the `metadata-tools` tagged test proves `{filename}` but not the other three documented tokens.
+- F-3-3: “Local & online” can imply cloud storage; use “Online · data stays local.”
+- F-3-4: the pricing dialog's “merchant of record” copy is jargon; use the concrete payment/refund wording in the review.
 
-Full evidence and defects by severity are in `.factory/verification-14.md`.
+## Verification performed
 
-## Reproduce
+From clean clone `/tmp/cq-review3-lGTGI5/repo` at `4b6bd5c24abb730785f23f292c37be10ebb62096`:
 
 ```sh
-git checkout 60f7ba60947b90a92cff8e50839ce233e878880a
 npm ci
+# Each of the 20 test strings in .factory/claims.json, run separately
 npm test
 npm run typecheck
-npm run lint --if-present
-npm audit --audit-level=high
 npm run build
-npm run verify:release
-npm run test:e2e -- --reporter=list
+npm run test:e2e -- --reporter=line
 npm run verify:url -- https://photo-metadata-queue.sociobot.in/
 npm run test:polish-live -- https://photo-metadata-queue.sociobot.in
-npm run test:live -- https://photo-metadata-queue.sociobot.in/
 ```
 
-Run each exact command in `.factory/claims.json` separately before the broader suite when repeating the release gate.
+Results: 20/20 exact claim commands, 18/18 unit tests, and 38/38 browser tests passed. The build produced `dist/` with 15.62 kB gzip JS. Independent live mobile/desktop first-read, demo reset/isolation, same-origin request logging, route metadata, link crawl, history/focus, designed 404, and Axe checks also passed.
 
-## Known gaps and next steps
+## Next steps
 
-- Low: the live-polish verifier's exact Forward-scroll pixel assertion timed out once, then passed. Five independent repetitions restored the route, heading focus, and scroll position within 0–3 px. Relax the assertion tolerance when product-code changes are next authorized.
-- The brief's target of halving a photographer's metadata time with 95% accepted sidecars needs a real pilot and baseline; it is not claimed in the product.
-
-The tree is buildable and ready for release. No deployment, infrastructure, DNS, billing, shared service, or out-of-scope resource was modified.
+Resolve F-3-1 through F-3-4, then repeat every exact claim command and the complete adversarial checklist. Do not change the verdict to PASS until the finding count and untested-claim count are both zero.
