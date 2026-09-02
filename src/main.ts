@@ -74,7 +74,7 @@ function icon(name: 'leaf' | 'check' | 'photo' | 'download' | 'plus' | 'settings
 
 function shell(content: string): string {
   return `<header class="topbar">
-    <a class="brand" href="${demoMode ? '/demo' : '/'}" data-nav><span class="brand-mark">${icon('leaf')}</span><span>Caption Queue</span></a>
+    <a class="brand" href="/" data-nav><span class="brand-mark">${icon('leaf')}</span><span>Caption Queue</span></a>
     <nav aria-label="Utility navigation">
       <a class="nav-link" href="/demo" data-nav>Demo</a>
       <a class="nav-link nav-privacy" href="/privacy" data-nav>Privacy</a>

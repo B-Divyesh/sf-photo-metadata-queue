@@ -293,6 +293,43 @@ test('mobile Back and Forward restore route scroll and focus', async ({ page }) 
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(280);
 });
 
+test('demo wordmark exits safely to home, focuses its heading, and deletes only demo data', async ({ page }) => {
+  await page.goto('/demo');
+  await expect(page.getByRole('heading', { name: 'Salt marsh bird survey', level: 1 })).toBeVisible();
+  await page.locator('#title').fill('Discard this demo edit');
+
+  await page.evaluate(() => new Promise<void>((resolve, reject) => {
+    const request = indexedDB.open('caption-queue', 1);
+    request.onupgradeneeded = () => request.result.createObjectStore('workspace');
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => {
+      const db = request.result;
+      const transaction = db.transaction('workspace', 'readwrite');
+      transaction.objectStore('workspace').put({ owner: 'real workspace', preserved: true }, 'real-data-sentinel');
+      transaction.oncomplete = () => { db.close(); resolve(); };
+      transaction.onerror = () => reject(transaction.error);
+    };
+  }));
+
+  const wordmark = page.getByRole('link', { name: 'Caption Queue' }).first();
+  await expect(wordmark).toHaveAttribute('href', '/');
+  await wordmark.click();
+
+  await expect(page).toHaveURL('http://127.0.0.1:4173/');
+  await expect(page.getByRole('heading', { name: 'Caption large shoots without changing originals', level: 1 })).toBeFocused();
+  await expect.poll(() => page.evaluate(async () => (await indexedDB.databases()).map((entry) => entry.name))).not.toContain('demo:caption-queue');
+  await expect(page.evaluate(() => new Promise((resolve, reject) => {
+    const request = indexedDB.open('caption-queue');
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => {
+      const db = request.result;
+      const get = db.transaction('workspace').objectStore('workspace').get('real-data-sentinel');
+      get.onsuccess = () => { db.close(); resolve(get.result); };
+      get.onerror = () => reject(get.error);
+    };
+  }))).resolves.toEqual({ owner: 'real workspace', preserved: true });
+});
+
 test('reviewed landing and demo copy uses plain photographer terms and correct grammar', async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('#connection')).toHaveText('Online · data stays local');

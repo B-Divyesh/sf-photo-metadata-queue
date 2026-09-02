@@ -1,1 +1,1 @@
-Write captions and XMP metadata for large photo shoots without changing the photos.
+Caption large photo shoots and export XMP metadata without changing the original files.
