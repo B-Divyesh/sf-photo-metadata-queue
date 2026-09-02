@@ -3,8 +3,8 @@ import { createServer, type Server } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import { extname, join, normalize } from 'node:path';
 
-const initialCache = 'caption-queue-v4';
-const updatedCache = 'caption-queue-v4-regression';
+const initialCache = 'caption-queue-v5';
+const updatedCache = 'caption-queue-v5-regression';
 const contentTypes: Record<string, string> = {
   '.css': 'text/css',
   '.html': 'text/html',

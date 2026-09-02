@@ -295,6 +295,8 @@ test('mobile Back and Forward restore route scroll and focus', async ({ page }) 
 
 test('reviewed landing and demo copy uses plain photographer terms and correct grammar', async ({ page }) => {
   await page.goto('/');
+  await expect(page.locator('#connection')).toHaveText('Online · data stays local');
+  await expect(page.getByText('Local & online')).toHaveCount(0);
   await expect(page.locator('.lede')).toHaveText('For photographers with large shoots, it turns folders or CSV files into a queue and writes separate XMP metadata files.');
   await expect(page.getByRole('heading', { name: 'Move one photo at a time' })).toBeVisible();
   await expect(page.getByText('Start from a photo folder or a CSV file.')).toBeVisible();
@@ -314,6 +316,15 @@ test('reviewed landing and demo copy uses plain photographer terms and correct g
   await page.locator('#title').fill('Edited ready record');
   await page.getByRole('button', { name: 'Next →' }).click();
   await expect(page.getByText('2 records still need review.')).toBeVisible();
+});
+
+test('pricing explains payment and refunds without merchant jargon', async ({ page }) => {
+  await page.getByRole('button', { name: 'View pricing' }).click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog).toContainText('Sociobot/Dodo handles payment and refunds. A refund cancels the license.');
+  await expect(dialog).not.toContainText('merchant of record');
+  await expect(dialog.getByRole('link', { name: 'terms' })).toHaveAttribute('href', '/terms');
+  await expect(dialog.getByRole('link', { name: 'privacy' })).toHaveAttribute('href', '/privacy');
 });
 
 test('designed 404 has route metadata, the shared navigation shell, and no serious axe violations', async ({ page }) => {

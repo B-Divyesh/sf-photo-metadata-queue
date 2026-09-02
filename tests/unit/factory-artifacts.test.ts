@@ -48,6 +48,7 @@ describe('factory verification artifacts', () => {
     expect(readme).toContain("contacts only this site's own servers");
     expect(readme).toContain('XMP, metadata CSV, and workspace backup exports remain free.');
     expect(claims.some((claim) => claim.id === 'free-core-exports')).toBe(true);
+    expect(claims.some((claim) => claim.id === 'csv-import-schema')).toBe(true);
     for (const removed of ['DAM handoff', 'image folder', 'locally in IndexedDB', 'File System Access API', 'same-origin requests']) {
       expect(readme).not.toContain(removed);
     }

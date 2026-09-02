@@ -24,8 +24,12 @@ export function csvToItems(input: string, shootId: string): QueueItem[] {
   const fileIndex = headers.findIndex((h) => ['filename', 'file', 'image'].includes(h));
   if (fileIndex < 0) throw new Error('Add a filename column to the CSV.');
   const get = (row: string[], names: string[]) => {
-    const index = headers.findIndex((h) => names.includes(h));
-    return index >= 0 ? (row[index] ?? '').trim() : '';
+    for (const name of names) {
+      const index = headers.indexOf(name);
+      const value = index >= 0 ? (row[index] ?? '').trim() : '';
+      if (value) return value;
+    }
+    return '';
   };
   return rows.slice(1).map((row, index) => {
     const fileName = row[fileIndex]?.trim();

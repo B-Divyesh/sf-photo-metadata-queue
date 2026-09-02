@@ -50,10 +50,17 @@
   },
   {
     "id": "metadata-tools",
-    "claim": "Caption tokens, controlled terms, and required-field validation update sample metadata.",
+    "claim": "The filename, sequence, shoot, and date caption tokens, controlled terms, and required-field validation update sample metadata.",
     "where": "editor, README",
     "test": "npm run test:e2e -- --grep @claim:metadata-tools",
-    "sandbox": "fresh Chromium context at /demo; insert a filename token; add a controlled term; exercise validation failure and recovery on the unfinished sample"
+    "sandbox": "fresh Chromium context at /demo; insert all four documented tokens and assert their exact values; add a controlled term; exercise validation failure and recovery on the unfinished sample"
+  },
+  {
+    "id": "csv-import-schema",
+    "claim": "CSV import requires a filename column and maps every documented metadata heading and alias.",
+    "where": "README capabilities and CSV heading reference",
+    "test": "npm run test:e2e -- --grep @claim:csv-import-schema",
+    "sandbox": "fresh Chromium context entered through /demo; start for real; reject a CSV without filename; import canonical and alias values for title, caption or description, keywords, creator or photographer, rights, city, state, country, and dateCreated; assert every editor field"
   },
   {
     "id": "bulk-xmp",

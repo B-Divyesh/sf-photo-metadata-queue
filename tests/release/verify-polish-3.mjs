@@ -4,7 +4,7 @@ import AxeBuilder from '@axe-core/playwright';
 import { chromium } from '@playwright/test';
 
 const base = process.argv[2] ?? 'https://photo-metadata-queue.sociobot.in';
-const evidence = '.factory/evidence-polish-2';
+const evidence = '.factory/evidence-polish-3';
 await mkdir(evidence, { recursive: true });
 
 const browser = await chromium.launch();
@@ -32,10 +32,19 @@ try {
   assert.equal(await desktop.page.locator('h1').count(), 1);
   assert.equal(await desktop.page.locator('h1').textContent(), 'Caption large shoots without changing originals');
   assert.equal(await desktop.page.getByRole('link', { name: 'Try it with sample data' }).getAttribute('href'), '/demo');
+  assert.equal(await desktop.page.locator('#connection').textContent(), 'Online · data stays local');
+  assert.equal(await desktop.page.getByText('Local & online').count(), 0);
   await desktop.page.locator('.pricing').getByText('XMP, metadata CSV, and workspace backup exports remain free.').waitFor();
   assert.equal(await desktop.page.getByText('Core XMP and data exports remain free.').count(), 0);
   await assertNoSeriousAxe(desktop.page);
   await desktop.page.screenshot({ path: `${evidence}/live-cold-desktop.png`, fullPage: true });
+  await desktop.page.getByRole('button', { name: 'View pricing' }).click();
+  const pricing = desktop.page.getByRole('dialog');
+  await pricing.getByText('Sociobot/Dodo handles payment and refunds.').waitFor();
+  await pricing.getByText('A refund cancels the license.').waitFor();
+  assert.equal(await pricing.getByText(/merchant of record/i).count(), 0);
+  await assertNoSeriousAxe(desktop.page);
+  await desktop.page.screenshot({ path: `${evidence}/live-pricing-desktop.png`, fullPage: true });
   await desktop.context.close();
 
   const mobile = await coldPage({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce' });
@@ -54,6 +63,13 @@ try {
   assert.equal(await mobile.page.locator('.specimen-row').count(), 3);
   await mobile.page.getByText('Creator, copyright, and location fields.').waitFor();
   assert.equal(await mobile.page.getByText('Portable IPTC ownership and place fields.').count(), 0);
+  const caption = mobile.page.locator('#description');
+  await caption.fill('');
+  for (const token of ['{filename}', '{sequence}', '{shoot}', '{date}']) {
+    await mobile.page.getByRole('button', { name: token, exact: true }).click();
+  }
+  assert.equal(await caption.inputValue(), 'BIRDS_1842001Salt marsh bird survey2026-08-20');
+  await mobile.page.screenshot({ path: `${evidence}/live-demo-tokens-mobile.png`, fullPage: true });
   await mobile.page.locator('#title').fill('Temporary live demo edit');
   await mobile.page.getByRole('button', { name: 'Reset demo' }).click();
   await mobile.page.waitForFunction(() => document.querySelector('#title')?.value === 'Great blue heron lifting from reeds');
@@ -67,11 +83,32 @@ try {
   assert.equal(new URL(free.page.url()).pathname, '/demo');
   await free.page.getByRole('button', { name: 'Start for real' }).click();
   assert.equal(await free.page.evaluate(() => localStorage.getItem('sb_license:photo-metadata-queue')), null);
+
   await free.page.locator('#csv-input').setInputFiles({
-    name: 'live-free-export.csv',
+    name: 'missing-filename.csv',
     mimeType: 'text/csv',
-    buffer: Buffer.from('filename,title,caption,creator,rights\nLIVE_001.jpg,Live one,First record,Mira Shah,© Mira Shah\nLIVE_002.jpg,Live two,Second record,Mira Shah,© Mira Shah')
+    buffer: Buffer.from('title,caption\nMissing file,A row without a filename')
   });
+  await free.page.locator('.notice-toast').getByText('Add a filename column to the CSV.').waitFor();
+  await free.page.locator('#csv-input').setInputFiles({
+    name: 'complete-schema.csv',
+    mimeType: 'text/csv',
+    buffer: Buffer.from([
+      'filename,title,caption,description,keywords,creator,photographer,rights,city,state,country,dateCreated',
+      'LIVE_001.jpg,Live one,First record,,bird; wetland,Mira Shah,,© Mira Shah,Kingston,Ontario,Canada,2026-08-21',
+      'LIVE_002.jpg,Live two,,Alias description,bird; dusk,,Nora Singh,© Nora Singh,Picton,Ontario,Canada,2026-08-22'
+    ].join('\n'))
+  });
+  assert.equal(await free.page.locator('#description').inputValue(), 'First record');
+  assert.equal(await free.page.locator('#creator').inputValue(), 'Mira Shah');
+  await free.page.getByRole('button', { name: /LIVE_002.jpg/ }).click();
+  assert.equal(await free.page.locator('#description').inputValue(), 'Alias description');
+  assert.equal(await free.page.locator('#creator').inputValue(), 'Nora Singh');
+  assert.equal(await free.page.locator('#city').inputValue(), 'Picton');
+  assert.equal(await free.page.locator('#state').inputValue(), 'Ontario');
+  assert.equal(await free.page.locator('#country').inputValue(), 'Canada');
+  assert.equal(await free.page.locator('#dateCreated').inputValue(), '2026-08-22');
+  await free.page.screenshot({ path: `${evidence}/live-csv-schema-desktop.png`, fullPage: true });
   await free.page.evaluate(() => {
     const writes = {};
     window.liveFreeWrites = writes;
@@ -83,10 +120,10 @@ try {
   await free.page.waitForFunction(() => Object.keys(window.liveFreeWrites ?? {}).length === 2);
   const csvDownload = free.page.waitForEvent('download');
   await free.page.getByRole('button', { name: 'Export metadata CSV' }).click();
-  assert.equal((await csvDownload).suggestedFilename(), 'live-free-export-metadata.csv');
+  assert.equal((await csvDownload).suggestedFilename(), 'complete-schema-metadata.csv');
   const backupDownload = free.page.waitForEvent('download');
   await free.page.getByRole('button', { name: 'Export workspace backup' }).click();
-  assert.equal((await backupDownload).suggestedFilename(), 'caption-queue-live-free-export.json');
+  assert.equal((await backupDownload).suggestedFilename(), 'caption-queue-complete-schema.json');
   await free.context.close();
 
   const history = await coldPage({ viewport: { width: 390, height: 844 } });
@@ -147,7 +184,7 @@ try {
   await offline.context.close();
 
   assert.deepEqual(errors, []);
-  console.log(`Polish 2 live verification passed at ${base}`);
+  console.log(`Polish 3 live verification passed at ${base}`);
 } finally {
   await browser.close();
 }

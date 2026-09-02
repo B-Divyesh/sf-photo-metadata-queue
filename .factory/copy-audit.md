@@ -1,11 +1,18 @@
 # Copy audit
 
-Audited 2026-08-30 after adversarial review 2. Counts treat numbers, abbreviations, paths, and hyphenated terms as one word. Every landing-page line is at most 22 words. No line uses a banned marketing word.
+Audited 2026-09-02 after adversarial review 3. Counts treat numbers, abbreviations, paths, and hyphenated terms as one word. Every landing-page line is at most 22 words. No line uses a banned marketing word.
 
 ## Landing page
 
 | Visible copy | Words | Result |
 | --- | ---: | --- |
+| Skip to main content | 4 | Pass |
+| Caption Queue | 2 | Pass; wordmark |
+| Demo | 1 | Pass; destination link |
+| Privacy | 1 | Pass; destination link |
+| Online · data stays local | 4 | Pass; separates connection state from storage location |
+| Change color theme | 3 | Pass; accessible control name |
+| View pricing | 2 | Pass |
 | Local photo metadata queue | 4 | Pass |
 | Caption large shoots without changing originals | 6 | Pass; `original-files-unchanged` claim |
 | For photographers with large shoots, it turns folders or CSV files into a queue and writes separate XMP metadata files. | 20 | Pass |
@@ -42,11 +49,34 @@ Audited 2026-08-30 after adversarial review 2. Counts treat numbers, abbreviatio
 | XMP, metadata CSV, and workspace backup exports remain free. | 9 | Pass; `free-core-exports` claim |
 | View Field edition | 3 | Pass |
 | Photo metadata stays on this device during the free workflow. | 10 | Pass; `local-privacy` claim |
+| Terms | 1 | Pass; destination link |
+| Source | 1 | Pass; destination link |
 | Caption Queue v1.0.0 · Built by Param Factory · Field-desk image generated for this product. | 15 | Pass |
 
-## README review findings
+### Pricing dialog
 
-The introduction defines `.xmp` metadata files before using the shorter `.xmp` file term. The audience text names a photo library or archive instead of “DAM.” User-facing capabilities say “browser database” and “this browser” instead of exposing IndexedDB. Folder writing is described by its result, and the privacy sentence says the workflow contacts only this site's servers. The free-export sentence names the three tested export types. The deployment routing and 404 behavior are two sentences; neither exceeds 22 words.
+| Visible copy | Words | Result |
+| --- | ---: | --- |
+| Field edition | 2 | Pass |
+| Handle shoots above 25 records | 5 | Pass |
+| Close | 1 | Pass; accessible control name |
+| $24 one-time purchase | 3 | Pass; `field-edition` claim |
+| No record limit per imported shoot | 6 | Pass; `field-edition` claim |
+| More than one saved shoot | 5 | Pass; `field-edition` claim |
+| Batch title, caption, and keyword patterns | 6 | Pass; `field-edition` claim |
+| The free edition handles one active shoot with up to 25 records. | 12 | Pass; `free-limit` claim |
+| XMP, metadata CSV, and workspace backup exports remain free. | 9 | Pass; `free-core-exports` claim |
+| Buy Field edition | 3 | Pass |
+| Have a license? | 3 | Pass |
+| Paste it here | 3 | Pass |
+| Verify license | 2 | Pass |
+| Sociobot/Dodo handles payment and refunds. | 5 | Pass; concrete payment wording |
+| A refund cancels the license. | 5 | Pass; concrete refund result |
+| See terms and privacy. | 4 | Pass |
+
+## README review
+
+The introduction defines `.xmp` metadata files before using the shorter `.xmp` file term. The audience text names a photo library or archive instead of “DAM.” User-facing capabilities say “browser database” and “this browser” instead of exposing IndexedDB. Folder writing is described by its result, and the privacy sentence says the workflow contacts only this site's servers. The free-export sentence names the three tested export types. The CSV schema maps to `csv-import-schema`; the four tokens map to `metadata-tools`. The deployment routing and 404 behavior are two sentences; neither exceeds 22 words.
 
 The demo helper “Creator, copyright, and location fields.” has five words. It names the visible fields without the unexplained “IPTC” acronym.
 

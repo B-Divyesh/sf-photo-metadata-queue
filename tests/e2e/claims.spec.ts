@@ -193,8 +193,12 @@ test('@claim:no-generated-captions imported empty records stay empty and make no
 
 test('@claim:metadata-tools tokens, terms, and validation update demo metadata', async ({ page }) => {
   await openFreshDemo(page);
-  await page.getByRole('button', { name: '{filename}' }).click();
-  await expect(page.locator('#description')).toHaveValue(/BIRDS_1842/);
+  const caption = page.locator('#description');
+  await caption.fill('');
+  for (const token of ['{filename}', '{sequence}', '{shoot}', '{date}']) {
+    await page.getByRole('button', { name: token, exact: true }).click();
+  }
+  await expect(caption).toHaveValue('BIRDS_1842001Salt marsh bird survey2026-08-20');
   await page.getByRole('button', { name: '+ dusk' }).click();
   await expect(page.locator('#keywords')).toHaveValue(/dusk/);
   await page.getByRole('button', { name: /BIRDS_1844.JPG/ }).click();
@@ -204,6 +208,48 @@ test('@claim:metadata-tools tokens, terms, and validation update demo metadata',
   await page.locator('#description').fill('A great blue heron settles into cordgrass after the evening survey.');
   await page.getByRole('button', { name: 'Mark ready & next' }).click();
   await expect(page.locator('.status-badge')).toContainText('Ready');
+});
+
+test('@claim:csv-import-schema CSV import requires filename and maps every documented metadata heading', async ({ page }) => {
+  await openFreshDemo(page);
+  await page.getByRole('button', { name: 'Start for real' }).click();
+
+  await page.locator('#csv-input').setInputFiles({
+    name: 'missing-filename.csv',
+    mimeType: 'text/csv',
+    buffer: Buffer.from('title,caption\nMissing file,A row without a filename')
+  });
+  await expect(page.locator('.notice-toast')).toContainText('Add a filename column to the CSV.');
+  await expect(page.locator('.specimen-row')).toHaveCount(0);
+
+  const completeCsv = [
+    'filename,title,caption,description,keywords,creator,photographer,rights,city,state,country,dateCreated',
+    'FRAME_101.jpg,Canonical title,Canonical caption,,bird; wetland,Canonical Creator,,© 2026 Canonical Creator,Kingston,Ontario,Canada,2026-08-21',
+    'FRAME_102.jpg,Alias title,,Alias description,bird; dusk,,Alias Photographer,© 2026 Alias Photographer,Picton,Ontario,Canada,2026-08-22'
+  ].join('\n');
+  await page.locator('#csv-input').setInputFiles({ name: 'complete-schema.csv', mimeType: 'text/csv', buffer: Buffer.from(completeCsv) });
+
+  await expect(page.getByRole('heading', { name: 'complete-schema', level: 1 })).toBeVisible();
+  await expect(page.locator('#title')).toHaveValue('Canonical title');
+  await expect(page.locator('#description')).toHaveValue('Canonical caption');
+  await expect(page.locator('#keywords')).toHaveValue('bird; wetland');
+  await expect(page.locator('#creator')).toHaveValue('Canonical Creator');
+  await expect(page.locator('#rights')).toHaveValue('© 2026 Canonical Creator');
+  await expect(page.locator('#city')).toHaveValue('Kingston');
+  await expect(page.locator('#state')).toHaveValue('Ontario');
+  await expect(page.locator('#country')).toHaveValue('Canada');
+  await expect(page.locator('#dateCreated')).toHaveValue('2026-08-21');
+
+  await page.getByRole('button', { name: /FRAME_102.jpg/ }).click();
+  await expect(page.locator('#title')).toHaveValue('Alias title');
+  await expect(page.locator('#description')).toHaveValue('Alias description');
+  await expect(page.locator('#keywords')).toHaveValue('bird; dusk');
+  await expect(page.locator('#creator')).toHaveValue('Alias Photographer');
+  await expect(page.locator('#rights')).toHaveValue('© 2026 Alias Photographer');
+  await expect(page.locator('#city')).toHaveValue('Picton');
+  await expect(page.locator('#state')).toHaveValue('Ontario');
+  await expect(page.locator('#country')).toHaveValue('Canada');
+  await expect(page.locator('#dateCreated')).toHaveValue('2026-08-22');
 });
 
 test('@claim:bulk-xmp export this shoot downloads one .xmp file per sample record', async ({ page }) => {

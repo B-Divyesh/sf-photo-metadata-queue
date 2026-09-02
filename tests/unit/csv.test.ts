@@ -15,6 +15,21 @@ describe('CSV import', () => {
     expect(item.metadata.creator).toBe('Mira');
   });
 
+  it('maps every documented heading and uses a populated alias', () => {
+    const input = [
+      'filename,title,caption,description,keywords,creator,photographer,rights,city,state,country,dateCreated',
+      'A.jpg,Heron,,At dawn,bird; wetland,,Mira Shah,© Mira Shah,Kingston,Ontario,Canada,2026-08-20'
+    ].join('\n');
+    const [item] = csvToItems(input, 'shoot');
+    expect(item).toMatchObject({
+      fileName: 'A.jpg',
+      metadata: {
+        title: 'Heron', description: 'At dawn', keywords: ['bird', 'wetland'], creator: 'Mira Shah',
+        rights: '© Mira Shah', city: 'Kingston', state: 'Ontario', country: 'Canada', dateCreated: '2026-08-20'
+      }
+    });
+  });
+
   it('requires a filename column', () => {
     expect(() => csvToItems('title\nNo file', 'shoot')).toThrow(/filename column/);
   });
