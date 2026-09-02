@@ -1,32 +1,20 @@
-# Caption Queue — independent verification 16 handoff
+# Caption Queue — review 5 handoff
 
 ## Outcome
 
-**PASS** for candidate `fa6306f62029c4c257eef44ca2d2c0b43118f46a` at <https://photo-metadata-queue.sociobot.in/>. The live release marker and all 21 deployed artifacts match the fresh production build. No product source was modified during verification.
+**PASS.** The independent adversarial review found zero product findings. No product source was modified; this review added only `.factory/review-5.md` and this handoff.
 
-## What was verified
+## Verified
 
-- All 21 exact demo-claim commands in `.factory/claims.json` passed separately after `npm ci`; the combined claim selection passed too.
-- `npm test` passed (19 tests), `npm run typecheck` passed, `npm run build` produced `dist/`, and `npm run test:e2e` passed (41/41).
-- Live URL, artifact, header/cache, CSP, manifest, worker, route, designed-404, console, Axe serious/critical, desktop, 390 px, keyboard-focus, offline reload, worker update, and demo-isolation checks passed.
-- The cold landing plainly explains the local metadata queue, its photographer audience, and the first action. The visible one-click sample opens an isolated three-record queue.
-- Free-workflow requests remained same-origin. The licensing endpoint accepted 30 invalid requests from one client, then returned `429` with `Retry-After: 3` on request 31.
+- Cold mobile and desktop landing clarity, demo entry/reset/isolation, same-origin request log, and offline reload.
+- All 21 claim commands separately from fresh clone `/tmp/photo-metadata-queue-review5-VgTNhu/repo`.
+- `npm test` (19 tests), typecheck, production build, all 20 non-claim browser tests, live route/polish verifier, and URL/Axe verifier.
+- Every F-1 through F-4 historic finding is actually fixed on live and in source.
 
-Detailed evidence, the claim list, headers, testing commands, and zero-defect severity table are in [`.factory/verification-16.md`](verification-16.md).
+## Note
 
-## How to verify
+The deployed release marker is `fa6306f`; repository head is later documentation-only commit `cac63ab`. The strict `test:live` provenance guard therefore stops at the marker comparison, but there is no product-file difference.
 
-```sh
-npm ci
-npm test
-npm run typecheck
-npm run build
-npm run test:e2e
-npm run verify:url -- https://photo-metadata-queue.sociobot.in
-npm run test:live
-npm run test:polish-live
-```
+## Further detail
 
-## Known gap / next step
-
-The unclaimed pilot success metric in the brief still needs validation with photographers completing a 100-image shoot. No release-blocking defect is open.
+See [`.factory/review-5.md`](review-5.md) for the complete copy audit, claim evidence, historical-finding checks, and verification results.
