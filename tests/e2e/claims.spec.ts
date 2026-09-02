@@ -195,10 +195,11 @@ test('@claim:metadata-tools tokens, terms, and validation update demo metadata',
   await openFreshDemo(page);
   const caption = page.locator('#description');
   await caption.fill('');
-  for (const token of ['{filename}', '{sequence}', '{shoot}', '{date}']) {
+  for (const [index, token] of ['{filename}', '{sequence}', '{shoot}', '{date}'].entries()) {
     await page.getByRole('button', { name: token, exact: true }).click();
+    if (index < 3) await caption.pressSequentially(' · ');
   }
-  await expect(caption).toHaveValue('BIRDS_1842001Salt marsh bird survey2026-08-20');
+  await expect(caption).toHaveValue('BIRDS_1842 · 001 · Salt marsh bird survey · 2026-08-20');
   await page.getByRole('button', { name: '+ dusk' }).click();
   await expect(page.locator('#keywords')).toHaveValue(/dusk/);
   await page.getByRole('button', { name: /BIRDS_1844.JPG/ }).click();
@@ -230,6 +231,7 @@ test('@claim:csv-import-schema CSV import requires filename and maps every docum
   await page.locator('#csv-input').setInputFiles({ name: 'complete-schema.csv', mimeType: 'text/csv', buffer: Buffer.from(completeCsv) });
 
   await expect(page.getByRole('heading', { name: 'complete-schema', level: 1 })).toBeVisible();
+  await expect(page.locator('.notice-toast')).toHaveCount(0);
   await expect(page.locator('#title')).toHaveValue('Canonical title');
   await expect(page.locator('#description')).toHaveValue('Canonical caption');
   await expect(page.locator('#keywords')).toHaveValue('bird; wetland');

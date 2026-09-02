@@ -319,7 +319,7 @@ async function importCsv(file: File): Promise<void> {
     const shoot: Shoot = { id: crypto.randomUUID(), name: file.name.replace(/\.csv$/i, '') || 'Imported shoot', createdAt: Date.now(), vocabulary: [] };
     const items = csvToItems(await file.text(), shoot.id);
     if (!paid && items.length > 25) { openLicense(); announce('This CSV has more than 25 records. Unlock Field edition or import a smaller manifest.'); return; }
-    data.shoots.push(shoot); data.items.push(...items); data.activeShootId = shoot.id; data.activeItemId = items[0].id; await persist(); render();
+    data.shoots.push(shoot); data.items.push(...items); data.activeShootId = shoot.id; data.activeItemId = items[0].id; await persist(); document.querySelector('.notice-toast')?.remove(); render();
   } catch (error) { announce(error instanceof Error ? error.message : 'The CSV could not be read.'); }
 }
 

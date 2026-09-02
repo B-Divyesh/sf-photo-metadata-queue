@@ -4,7 +4,7 @@ import AxeBuilder from '@axe-core/playwright';
 import { chromium } from '@playwright/test';
 
 const base = process.argv[2] ?? 'https://photo-metadata-queue.sociobot.in';
-const evidence = '.factory/evidence-polish-3';
+const evidence = process.env.POLISH_EVIDENCE_DIR ?? '.factory/evidence-polish-3';
 await mkdir(evidence, { recursive: true });
 
 const browser = await chromium.launch();
@@ -65,10 +65,11 @@ try {
   assert.equal(await mobile.page.getByText('Portable IPTC ownership and place fields.').count(), 0);
   const caption = mobile.page.locator('#description');
   await caption.fill('');
-  for (const token of ['{filename}', '{sequence}', '{shoot}', '{date}']) {
+  for (const [index, token] of ['{filename}', '{sequence}', '{shoot}', '{date}'].entries()) {
     await mobile.page.getByRole('button', { name: token, exact: true }).click();
+    if (index < 3) await caption.pressSequentially(' · ');
   }
-  assert.equal(await caption.inputValue(), 'BIRDS_1842001Salt marsh bird survey2026-08-20');
+  assert.equal(await caption.inputValue(), 'BIRDS_1842 · 001 · Salt marsh bird survey · 2026-08-20');
   await mobile.page.screenshot({ path: `${evidence}/live-demo-tokens-mobile.png`, fullPage: true });
   await mobile.page.locator('#title').fill('Temporary live demo edit');
   await mobile.page.getByRole('button', { name: 'Reset demo' }).click();
@@ -99,6 +100,7 @@ try {
       'LIVE_002.jpg,Live two,,Alias description,bird; dusk,,Nora Singh,© Nora Singh,Picton,Ontario,Canada,2026-08-22'
     ].join('\n'))
   });
+  assert.equal(await free.page.locator('.notice-toast').count(), 0);
   assert.equal(await free.page.locator('#description').inputValue(), 'First record');
   assert.equal(await free.page.locator('#creator').inputValue(), 'Mira Shah');
   await free.page.getByRole('button', { name: /LIVE_002.jpg/ }).click();
@@ -142,7 +144,12 @@ try {
   await history.page.waitForFunction(() => location.pathname === '/' && scrollY === 0);
   assert.equal(await history.page.locator('h1').evaluate((element) => element === document.activeElement), true);
   await history.page.goForward();
-  await history.page.waitForFunction((expectedY) => location.pathname === '/privacy' && scrollY === expectedY, savedScroll.y);
+  await history.page.waitForFunction(() => location.pathname === '/privacy');
+  await history.page.waitForTimeout(500);
+  const restoredScroll = await history.page.evaluate(() => ({ y: scrollY, saved: history.state?.scrollY }));
+  assert.ok(Math.abs(restoredScroll.y - savedScroll.y) <= 1, `Forward restored ${restoredScroll.y}px instead of ${savedScroll.y}px`);
+  assert.equal(restoredScroll.saved, savedScroll.y);
+  assert.equal(await history.page.locator('h1').evaluate((element) => element === document.activeElement), true);
   await history.context.close();
 
   const routes = await coldPage({ viewport: { width: 390, height: 844 }, colorScheme: 'dark' });
