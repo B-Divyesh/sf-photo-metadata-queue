@@ -1,52 +1,45 @@
-# Caption Queue — repair 11 handoff
+# Caption Queue — independent verification 14 handoff
 
 ## Outcome
 
-**Repaired the verification-13 release-provenance blocker.** The report found no product defect. Its only blocker was that the requested SHA did not exist on `origin`, even though a different build matched the live PWA.
+**PASS** for candidate `60f7ba60947b90a92cff8e50839ce233e878880a` at <https://photo-metadata-queue.sociobot.in/> on 2026-09-02 UTC.
 
-Every production build now emits `dist/release.json`. It contains the full Git commit SHA of the source that produced the artifact. Live verification requires three equal values: that marker, the checked-out source, and `origin/main`. A release cannot pass artifact parity while identifying a missing or different candidate.
+The deployed PWA is the candidate: source `HEAD`, public `origin/main`, local and live `release.json`, and all 21 deployed artifacts agree. The earlier release-provenance blocker is resolved. No product code was changed during verification.
 
-## Repair details
+## What was verified
 
-- Added deterministic build provenance with schema version `1` and a full 40-character Git SHA.
-- Added `npm run verify:release` for local marker/source validation.
-- Strengthened `npm run test:live` to require a published `main` SHA and the live `/release.json` marker before comparing every deployed artifact.
-- Added regression coverage that writes, validates, and rejects mismatched release markers.
-- Documented the post-deploy identity check in the README.
+- All 20 exact commands in `.factory/claims.json` passed separately after a clean `npm ci`.
+- The live cold first screen plainly explains what the product does, who it serves, and what to click first. The one-click sample opens three isolated records.
+- `npm test` passed 18/18; typecheck, dependency audit, exact build, and local provenance validation passed.
+- The complete Playwright suite passed 38/38, including keyboard, mobile, Axe, offline reload, and service-worker update coverage.
+- Live metadata editing, validation, XMP/CSV export, XML escaping, invalid-length recovery, malformed-backup recovery, and invalid-CSV recovery worked.
+- Free-workflow traffic stayed same-origin. Browser headers, caching, legal routes, links, hosted checkout, and the designed HTTP 404 passed.
+- License verification allowed 30 requests from one client; request 31 returned `429` with `Retry-After: 4`.
+- Clean mobile Lighthouse: Performance 98, Accessibility 100, Best Practices 100, SEO 100; LCP 1,652 ms and CLS 0.
 
-## Verification
+Full evidence and defects by severity are in `.factory/verification-14.md`.
 
-- Clean install: `npm ci` — 60 packages installed; `npm audit --audit-level=high` reported 0 vulnerabilities.
-- Unit/integration: `npm test` — 18/18 passed across 5 files, including two provenance regression tests.
-- Type/lint: `npm run typecheck` passed; `npm run lint --if-present` completed (no lint script is configured).
-- Production build: `npm run build` passed and produced `dist/` with `release.json`.
-- Local provenance: `npm run verify:release` passed.
-- Browser/PWA: `npm run test:e2e -- --reporter=list` — 38/38 passed, covering desktop/mobile, keyboard, Axe, offline reload, and worker update.
-- Mandatory claims: all 20 exact commands from `.factory/claims.json` passed separately after the clean install.
-- Local and live accessibility: `npm run verify:url` passed at desktop and 390 px. It checks route titles, language, landmarks, one h1, image alt text, horizontal overflow, console errors, and serious/critical Axe results.
-- Live workflow: `npm run test:polish-live -- https://photo-metadata-queue.sociobot.in` passed. It covers the first-read/demo flow, keyboard history, free exports, dark/reduced-motion accessibility, service-worker offline reload, and no unexpected console errors.
-- Live identity: `npm run test:live -- https://photo-metadata-queue.sociobot.in/` passed. The production artifact has 21 files; every one byte-matches `dist/`, and the release marker, source, and public `main` agree.
-- Lighthouse 12.8.2 on the live site: Performance 100, Accessibility 100, Best Practices 100, SEO 100; LCP 1,359 ms and CLS 0.
-
-## Deploy and prove the release
+## Reproduce
 
 ```sh
 npm ci
 npm test
 npm run typecheck
+npm run lint --if-present
+npm audit --audit-level=high
 npm run build
-git push origin main
-# Deploy `dist/` to the `sf-photo-metadata-queue` production static app.
-npm run test:live -- https://photo-metadata-queue.sociobot.in/
+npm run verify:release
+npm run test:e2e -- --reporter=list
+npm run verify:url -- https://photo-metadata-queue.sociobot.in/
 npm run test:polish-live -- https://photo-metadata-queue.sociobot.in
+npm run test:live -- https://photo-metadata-queue.sociobot.in/
 ```
 
-`test:live` is the identity proof. It fails unless the live static artifact, source checkout, and public `main` reference identify the same commit.
+Run each exact command in `.factory/claims.json` separately before the broader suite when repeating the release gate.
 
-## Deployment
+## Known gaps and next steps
 
-The repair was pushed to `main` and deployed to the `sf-photo-metadata-queue` production static app at <https://photo-metadata-queue.sociobot.in/>. The deployed `/release.json` is the auditable release identity; the live verifier requires it to match both the tested Git source and `origin/main`.
+- Low: the live-polish verifier's exact Forward-scroll pixel assertion timed out once, then passed. Five independent repetitions restored the route, heading focus, and scroll position within 0–3 px. Relax the assertion tolerance when product-code changes are next authorized.
+- The brief's target of halving a photographer's metadata time with 95% accepted sidecars needs a real pilot and baseline; it is not claimed in the product.
 
-## Known gaps
-
-The original SHA `98b01d0d50cb144d87e008865bd13a967205814f` cannot be made available retroactively. This repair publishes a new, independently verifiable candidate and leaves no known product or release-provenance gap.
+The tree is buildable and ready for release. No deployment, infrastructure, DNS, billing, shared service, or out-of-scope resource was modified.
