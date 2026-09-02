@@ -1,6 +1,6 @@
 # Copy audit
 
-Audited 2026-09-02 after adversarial review 3. Counts treat numbers, abbreviations, paths, and hyphenated terms as one word. Every landing-page line is at most 22 words. No line uses a banned marketing word.
+Audited 2026-09-02 after adversarial review 4. Counts treat numbers, abbreviations, paths, and hyphenated terms as one word. Every landing-page line is at most 22 words. No line uses a banned marketing word.
 
 ## Landing page
 
@@ -79,6 +79,10 @@ Audited 2026-09-02 after adversarial review 3. Counts treat numbers, abbreviatio
 The introduction defines `.xmp` metadata files before using the shorter `.xmp` file term. The audience text names a photo library or archive instead of “DAM.” User-facing capabilities say “browser database” and “this browser” instead of exposing IndexedDB. Folder writing is described by its result, and the privacy sentence says the workflow contacts only this site's servers. The free-export sentence names the three tested export types. The CSV schema maps to `csv-import-schema`; the four tokens map to `metadata-tools`. The deployment routing and 404 behavior are two sentences; neither exceeds 22 words.
 
 The demo helper “Creator, copyright, and location fields.” has five words. It names the visible fields without the unexplained “IPTC” acronym.
+
+## Catalog
+
+“Caption large photo shoots and export XMP metadata without changing the original files.” has 13 words and 87 characters. It starts with a verb and names the product result.
 
 ## Terminology
 

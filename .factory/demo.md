@@ -15,6 +15,7 @@ The demo opens “Salt marsh bird survey” with three JPEG records from a ficti
 - Demo mode does not read the real workspace or its license token.
 - **Reset demo** deletes the demo database and restores the bundled records.
 - **Start for real** deletes the demo database and opens the separate real workspace.
+- The **Caption Queue** wordmark deletes the demo database and returns home without deleting the real database.
 
 The demo database persists edits across a reload so offline behavior can be tested. “Nothing is saved” in the banner means nothing is copied into the real workspace; leaving demo mode discards the sample database.
 

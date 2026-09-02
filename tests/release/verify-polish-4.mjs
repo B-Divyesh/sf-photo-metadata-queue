@@ -37,7 +37,10 @@ try {
   const wordmark = page.getByRole('link', { name: 'Caption Queue' }).first();
   assert.equal(await wordmark.getAttribute('href'), '/');
   await page.screenshot({ path: `${evidence}/live-demo-wordmark-mobile.png` });
-  await wordmark.click();
+  await Promise.all([
+    page.waitForURL((url) => url.pathname === '/'),
+    wordmark.click()
+  ]);
 
   assert.equal(new URL(page.url()).pathname, '/');
   const heading = page.getByRole('heading', { name: 'Caption large shoots without changing originals', level: 1 });
