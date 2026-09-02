@@ -4,7 +4,7 @@
 
 **PASS** for candidate `60f7ba60947b90a92cff8e50839ce233e878880a` at <https://photo-metadata-queue.sociobot.in/> on 2026-09-02 UTC.
 
-The deployed PWA is the candidate: source `HEAD`, public `origin/main`, local and live `release.json`, and all 21 deployed artifacts agree. The earlier release-provenance blocker is resolved. No product code was changed during verification.
+The deployed PWA is the candidate. At the identity-check point, before committing the required verification records, source `HEAD`, public `origin/main`, local and live `release.json`, and all 21 deployed artifacts agreed. The later report commits change only `.factory` documentation and are not deployed product candidates. The earlier release-provenance blocker is resolved. No product code was changed during verification.
 
 ## What was verified
 
@@ -22,6 +22,7 @@ Full evidence and defects by severity are in `.factory/verification-14.md`.
 ## Reproduce
 
 ```sh
+git checkout 60f7ba60947b90a92cff8e50839ce233e878880a
 npm ci
 npm test
 npm run typecheck

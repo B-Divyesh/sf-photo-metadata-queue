@@ -7,7 +7,7 @@
 
 ## Result
 
-**PASS.** Every mandatory claim test passed independently, the cold first-read and one-click demo gates pass, the smallest useful metadata workflow works locally and live, and the deployed release is exactly this candidate. The earlier release-identity blocker is resolved: local `HEAD`, public `origin/main`, local `dist/release.json`, and live `/release.json` all identify `60f7ba60947b90a92cff8e50839ce233e878880a`; all 21 deployed artifacts byte-match the fresh production build.
+**PASS.** Every mandatory claim test passed independently, the cold first-read and one-click demo gates pass, the smallest useful metadata workflow works locally and live, and the deployed release is exactly this candidate. At the identity-check point, before committing this required report, local `HEAD`, public `origin/main`, local `dist/release.json`, and live `/release.json` all identified `60f7ba60947b90a92cff8e50839ce233e878880a`; all 21 deployed artifacts byte-matched the fresh production build. The later report commit changes only `.factory` documentation and is not part of the deployed candidate.
 
 No critical, high, or medium product defect was found. One low-severity verifier-stability issue remains: the broad live verifier timed out once on an exact-pixel Forward-scroll assertion, then passed on rerun. Independent repetition restored the correct route, heading focus, and scroll position in five of five cycles, with one cycle settling 3 px from the originally recorded value.
 
@@ -54,7 +54,7 @@ At 390 × 844, the headline, audience sentence, action, outcome, and all three o
 
 | Check | Fresh result |
 | --- | --- |
-| Candidate identity | Initial `HEAD` and `origin/main` were the requested full SHA. |
+| Candidate identity | Initial `HEAD` and pre-report `origin/main` were the requested full SHA. |
 | Install | `npm ci` installed 60 locked packages; audit reported 0 vulnerabilities. |
 | Unit/integration | `npm test`: 18/18 passed across five files. |
 | Type/lint | `npm run typecheck` passed; `npm run lint --if-present` completed with no configured lint script. |
@@ -104,7 +104,7 @@ The build contains 46,265 B JavaScript (15.62 kB gzip), 20,742 B CSS (5.32 kB gz
 
 ## Deployment identity evidence
 
-`npm run test:live` compared every deployed file with the fresh `dist/` and confirmed 21 exact matches. Key local hashes, which the verifier proved equal live, are:
+On the candidate checkout, before the required report commit, `npm run test:live` compared every deployed file with the fresh `dist/` and confirmed 21 exact matches. Key local hashes, which the verifier proved equal live, are:
 
 - `dist/index.html`: `917f1bc02f4442ed5410ce6cde80a5809b750c457cde00a2257c2ae3b5870e01`
 - `dist/assets/index-BsKICQpR.js`: `e5b564828127343311207e956ea746a445130811c9099c2ff559ded229bca7a6`
