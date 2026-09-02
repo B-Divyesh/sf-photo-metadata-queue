@@ -1,49 +1,40 @@
-# Caption Queue — polish round 3 handoff
+# Caption Queue — independent verification 15 handoff
 
 ## Outcome
 
-**PASS.** All 30 findings across `.factory/review-1.md`, `review-2.md`, and `review-3.md` are closed. Caption Queue remains the original local-first PWA with its botanical field-guide visual system.
+**PASS.** Candidate `f15de814481ccd27de2703a34ecc28602561a1af` was independently verified at <https://photo-metadata-queue.sociobot.in/> on 2026-09-02 UTC. No product code was changed.
 
-## What changed
+All 21 exact claim commands, 19 unit tests, TypeScript, the production build, 40 browser/PWA tests, release provenance, live artifact parity, URL checks, and the independent desktop/mobile workflow passed. The live deployment byte-matched all 21 files in the fresh `dist/` build before this documentation-only handoff commit.
 
-- Added the `csv-import-schema` claim and one clean-demo browser test for the required `filename` column, every documented field, and both documented aliases.
-- Expanded `metadata-tools` to prove `{filename}`, padded `{sequence}`, `{shoot}`, and `{date}` exactly.
-- Rewrote the connection and payment/refund copy in plain words, including matching terms-page wording.
-- Made CSV aliases choose the first populated documented value. A successful retry now removes any stale import error.
-- Bumped the service-worker cache and retained demo isolation, offline behavior, route metadata, focus restoration, accessibility, privacy, export, and license behavior.
-- Updated `.factory/claims.json`, `.factory/copy-audit.md`, `.factory/catalog-description.txt`, `.factory/polish-3.md`, and the release verifier.
+## Key evidence
 
-## Verification evidence
+- Cold first-read and one-click demo gates pass at desktop and 390 px.
+- Live normal, invalid, boundary, and recovery cases pass, including escaped XMP, CSV schema/aliases, malformed backup handling, and the 25/26 free limit.
+- Free workflow traffic is same-origin only. License verification enforces 30 accepted requests per client/window; request 31 returns 429 with `Retry-After: 4`.
+- Fresh light/dark Axe checks found no serious/critical issue; keyboard, focus, 44 px targets, 200% text, and reduced motion pass.
+- Live offline reload retains edits; installability has no errors; the service-worker update regression test passes.
+- Lighthouse mobile is 100/100/100/100; LCP 1.39 s, TBT 0 ms, CLS 0.
+- JS is 46,307 B raw / 15,590 B gzip; CSS is 20,742 B raw / 5,339 B gzip.
 
-From a fresh clone of final `origin/main`:
+The full evidence and severity table are in [`.factory/verification-15.md`](verification-15.md). Fresh screenshots and Lighthouse JSON are in [`.factory/qa-15/`](qa-15/).
+
+## Reproduce
 
 ```sh
 npm ci
-# all 21 exact test commands from .factory/claims.json, run separately
+# Run every test command in .factory/claims.json separately
 npm test
 npm run typecheck
 npm run build
 npm run test:e2e -- --reporter=line
-```
-
-Results: 21/21 exact claim commands, 19/19 unit tests, and 40/40 browser tests passed. `npm audit --audit-level=high` reported zero vulnerabilities.
-
-After deploying through `/opt/fleet/lib/deploy-static.sh photo-metadata-queue dist`:
-
-```sh
-npm run test:live -- https://photo-metadata-queue.sociobot.in/
+npm run verify:release
 npm run verify:url -- https://photo-metadata-queue.sociobot.in/
+npm run test:live -- https://photo-metadata-queue.sociobot.in/
 npm run test:polish-live -- https://photo-metadata-queue.sociobot.in
 ```
 
-The live artifact parity, headers, known routes, designed HTTP 404, cold first screen, isolated demo/reset, CSV schema, all tokens, payment copy, history focus/scroll, offline reload, same-origin traffic, and serious/critical Axe checks passed. Screenshots and the Lighthouse JSON are in `.factory/evidence-polish-3/`.
+## Defects and next steps
 
-Lighthouse mobile: Performance 100, Accessibility 100, Best Practices 100, SEO 100; FCP 1.1 s, LCP 1.4 s, TBT 0 ms, CLS 0. Production JS is 46.31 kB raw / 15.63 kB gzip; main CSS is 20.74 kB raw / 5.32 kB gzip.
+Critical: 0. High: 0. Medium: 0. Low: 0.
 
-## Run and deploy
-
-Use `npm ci`, `npm run dev`, `npm test`, `npm run typecheck`, `npm run build`, and `npm run test:e2e`. Deploy only the generated `dist/` directory through the work-order static deploy command above.
-
-## Known gaps and next steps
-
-None. No review finding, claim gap, accessibility defect, or deployment mismatch remains.
+No release work remains. The brief's success measure still needs a real photographer pilot and prior-time baseline; the product does not claim that result yet.
